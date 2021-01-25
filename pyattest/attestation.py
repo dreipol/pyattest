@@ -8,5 +8,5 @@ class Attestation:
         self.nonce = nonce
         self.config = config
 
-    def verify(self):
+    def verify(self) -> bool:
         return self.config.verifier_class(self).verify()

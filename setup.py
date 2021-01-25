@@ -13,7 +13,7 @@ from setuptools import find_packages, setup, Command
 
 # Package meta-data.
 NAME = 'payttest'
-DESCRIPTION = 'Native app attestation made easy'
+DESCRIPTION = 'Native app dreiattest made easy'
 URL = 'https://github.com/dreipol/pyattest'
 EMAIL = 'dev@dreipol.ch'
 AUTHOR = 'dreipol'

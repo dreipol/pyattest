@@ -1,3 +1,4 @@
+import base64
 import struct
 from hashlib import sha256
 
@@ -14,9 +15,9 @@ from cbor2 import loads as cbor_decode
 
 
 class AppleVerifier(Verifier):
-    def verify(self):
+    def verify(self) -> bool:
         """
-        Verify the given attestation based on the Apple documentation. The attestation is CBOR encoded and after
+        Verify the given dreiattest based on the Apple documentation. The dreiattest is CBOR encoded and after
         decoding contains all relevant data according to the Webauthn specification.
 
         Raises a PyAttestException as soon as one of the verification steps fails.
@@ -32,23 +33,32 @@ class AppleVerifier(Verifier):
         credential_data    Variable length, contains the credential_id and credential_public_key. The length is
                            set at byte 17 and 18.
         """
-        data = cbor_decode(self.attestation.data)
+        data = self.unpack(self.attestation.data)
 
-        rp_id = data['authData'][:32]
-        counter = struct.unpack('!I', data['authData'][33:37])[0]
-
-        credential_data = data['authData'][37:]
-        aaguid = credential_data[:16]
-        credential_id_length = struct.unpack('!H', credential_data[16:18])[0]
-        credential_id = credential_data[18:18 + credential_id_length]
-
-        chain = self.verify_certificate_chain(data['attStmt']['x5c'])
-        self.verify_nonce(data['authData'], self.attestation.nonce, chain[-1])
+        chain = self.verify_certificate_chain(data['raw']['attStmt']['x5c'])
+        self.verify_nonce(data['raw']['authData'], self.attestation.nonce, chain[-1])
         self.verify_key_id(chain[-1])
-        self.verify_app_id(rp_id)
-        self.verify_counter(counter)
-        self.verify_aaguid(aaguid)
-        self.verify_credential_id(credential_id, chain[-1])
+        self.verify_app_id(data['rp_id'])
+        self.verify_counter(data['counter'])
+        self.verify_aaguid(data['aaguid'])
+        self.verify_credential_id(data['credential_id'], chain[-1])
+
+        return True
+
+    def unpack(self, raw: bytes) -> dict:
+        """ Extract in `verify` method mentioned relevant data from cbor encoded raw bytes input. """
+        raw = cbor_decode(raw)
+
+        credential_data = raw['authData'][37:]
+        credential_id_length = struct.unpack('!H', credential_data[16:18])[0]
+
+        return {
+            'raw': raw,
+            'rp_id': raw['authData'][:32],
+            'counter': struct.unpack('!I', raw['authData'][33:37])[0],
+            'aaguid': credential_data[:16],
+            'credential_id': credential_data[18:18 + credential_id_length],
+        }
 
     def verify_credential_id(self, credential_id: bytes, cert: Certificate) -> bool:
         """ Verify that the authenticator data’s credentialId field is the same as the key identifier. """
@@ -103,7 +113,7 @@ class AppleVerifier(Verifier):
     def verify_nonce(self, auth_data: bytes, nonce: bytes, cert: Certificate) -> bool:
         """
         Create clientDataHash as the SHA256 hash of the one-time challenge sent to your app before performing the
-        attestation, and append that hash to the end of the authenticator data (authData from the decoded object).
+        dreiattest, and append that hash to the end of the authenticator data (authData from the decoded object).
 
         Generate a new SHA256 hash of the composite item to create nonce.
 

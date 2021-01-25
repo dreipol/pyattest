@@ -23,7 +23,27 @@ class AppleConfig(Config):
         See also: https://www.apple.com/certificateauthority/private/
         """
         if self._custom_root_ca:
-            return self._custom_root_ca
+            # Dynamically load from tests/fixtures
+            return b"""-----BEGIN CERTIFICATE-----
+MIIDHTCCAgWgAwIBAgIUKjXRVMO4RtM2Bq8+qTX/Ea1gjOEwDQYJKoZIhvcNAQEL
+BQAwHjEcMBoGA1UECgwTcHlhdHRlc3QtdGVzdGluZy1jYTAeFw0yMTAxMjUxNDMy
+MTlaFw00ODA2MTExNDMyMTlaMB4xHDAaBgNVBAoME3B5YXR0ZXN0LXRlc3Rpbmct
+Y2EwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDCcR7RZvJiczSVm+np
+bn9Ly1OCRi5EnkiwHtMt9QDFV69LU8NJJWHxgTVvnu7EYVcYy88M9pjpUpEuFU7j
+L8F++XEYdJ4adZ1gR5kPvhdWHKLi2omf+gxqoRTNWSY4Bh9rbTXrkN+qJ3Urkv12
+GJKsH8x0WU408Bkk7aL6vj4PfuWdxk0uhv2EcPAlillXqRYP+i/Qz+5mpyy7DZF0
+LxxyYSyZOSRzkdbEz1sfxxYiwgJvCSxu+0oMhN0Rs0wWUSbTs6pDDwmIHwpTRQIS
+jUYGf/3iX8E8wzUGdZpRyHVJNqY8Pm9wSihJLnX6sXnaekWilD8w0ZBK1av0uR+O
++4G/AgMBAAGjUzBRMB0GA1UdDgQWBBSL3bGofi5K1n7XkPG1w8CvIZiVXDAfBgNV
+HSMEGDAWgBSL3bGofi5K1n7XkPG1w8CvIZiVXDAPBgNVHRMBAf8EBTADAQH/MA0G
+CSqGSIb3DQEBCwUAA4IBAQCaShthI3PCk30xbSZesxXN6CvyCfnmDV4WEpz5xuKl
+unb8a27VoAicKIXNxenzBZvP2NBUNe6YnQ1Gp/zFweyP9xEMFEWrr5o+2NNaCXMd
+Z2moGYJLAT82XsWVnIHOmGZWrxsc8YxVxTMca9OYgMq45NV3gojqBHJF+k8JS7w4
+aOMblyTgMHdcS2EQJa4ubGkPhvZdcKvINEBQPJuXu0IYOoHvN1Egs+dwM15GgK8j
+zTPxgeOYNJ6vlRqVHORNoM/EOmocX3qx3/Skeu2bBTBiVYc/Y/XZlxoe3it/99ha
+4kaFsDhouj9LkCeLh+4kfH5wUxkRXjtz2N4LIMEzT6+k
+-----END CERTIFICATE-----
+            """
 
         return b"""-----BEGIN CERTIFICATE-----
 MIICITCCAaegAwIBAgIQC/O+DvHN0uD7jG5yH2IXmDAKBggqhkjOPQQDAzBSMSYw

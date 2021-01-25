@@ -1,22 +1,15 @@
-import base64
-from pathlib import Path
+import os
 
 from pyattest.attestation import Attestation
 from pyattest.configs.apple import AppleConfig
+from tests import attestation as attest_factory
 
 
-def test_apple():
-    config = AppleConfig(app_id='5LVDC4HW22.ch.dreipol.dreiAttestTestHost')
-    attest = Path('stubs/attestation').read_text()
+def test_happy_path():
+    nonce = os.urandom(32)
+    attest = attest_factory.create(app_id='foo', nonce=nonce, aaguid=b'appattestdevelop', counter=1)
+    config = AppleConfig(app_id='foo', root_ca='asdf')
 
-    server_nonce = '1fc6d08a2ffc842e25e4ca0deac203cd'  # Sent beforehand
-    key_id = 'mbrDsK6QyPjKoTiliNSETympZqA643NiWIiK6B7vEOw='  # sha256 uf the public key (in request)
-    uid = 'registration;A6215681-970F-4761-B352-0F0735F7E86F'  # in request header
-
-    # dreiAttest specific -> does it make sense use pubkey and uid in nonce?
-    nonce = (uid + key_id + server_nonce).encode()
-
-    attestation = Attestation(base64.b64decode(key_id), base64.b64decode(attest), nonce, config)
-    attestation.verify()
-
-    assert 1 == 1
+    attestation = Attestation(b'', attest, nonce, config)
+    result = attestation.verify()
+    foo = 'bar'

@@ -1,2 +1,6 @@
+from pyattest.attestation import Attestation
+
+
 class Verifier:
-    pass
+    def __init__(self, attestation: Attestation):
+        self.attestation = attestation

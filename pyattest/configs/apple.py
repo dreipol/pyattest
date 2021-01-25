@@ -5,8 +5,10 @@ from pyattest.verifiers.apple import AppleVerifier
 class AppleConfig(Config):
     verifier_class = AppleVerifier
 
-    def __init__(self, app_id: str):
+    def __init__(self, app_id: str, production: bool = False, root_ca: bytes = None):
         self.app_id = app_id
+        self.production = production
+        self._custom_root_ca = root_ca
 
     @property
     def oid(self) -> str:
@@ -16,9 +18,13 @@ class AppleConfig(Config):
     @property
     def root_ca(self) -> bytes:
         """
-        Apples App Attestation Root CA
-        @see: https://www.apple.com/certificateauthority/private/
+        Apples App Attestation Root CA. This can be overwritten for easier testing.
+
+        See also: https://www.apple.com/certificateauthority/private/
         """
+        if self._custom_root_ca:
+            return self._custom_root_ca
+
         return b"""-----BEGIN CERTIFICATE-----
 MIICITCCAaegAwIBAgIQC/O+DvHN0uD7jG5yH2IXmDAKBggqhkjOPQQDAzBSMSYw
 JAYDVQQDDB1BcHBsZSBBcHAgQXR0ZXN0YXRpb24gUm9vdCBDQTETMBEGA1UECgwK

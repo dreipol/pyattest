@@ -11,7 +11,7 @@ from pyattest.configs.apple import AppleConfig
 def test_apple():
     """ Special test specific for the dreiattest package. """
     config = AppleConfig(app_id='5LVDC4HW22.ch.dreipol.dreiAttestTestHost')
-    attest = Path('stubs/dreiattest').read_text()
+    attest = Path('fixtures/dreiattest').read_text()
 
     server_nonce = '1fc6d08a2ffc842e25e4ca0deac203cd'  # sent beforehand
     key_id = 'mbrDsK6QyPjKoTiliNSETympZqA643NiWIiK6B7vEOw='  # sha256 uf the public key which is in the request

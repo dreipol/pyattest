@@ -12,11 +12,12 @@ from pyattest.exceptions import InvalidAaguidException, InvalidNonceException, I
     InvalidAppIdException, InvalidCounterException, InvalidCredentialIdException
 from tests import attestation as attest_factory
 
+root_ca = load_pem_x509_certificate(Path('tests/fixtures/root_cert.pem').read_bytes())
+nonce = os.urandom(32)
+
 
 def test_happy_path():
     """ Test the basic attest verification where everything works like it should :) """
-    nonce = os.urandom(32)
-    root_ca = load_pem_x509_certificate(Path('fixtures/root_cert.pem').read_bytes())
     attest, public_key = attest_factory.create(app_id='foo', nonce=nonce, aaguid=b'appattestdevelop', counter=0)
     config = AppleConfig(app_id='foo', root_ca=root_ca.public_bytes(serialization.Encoding.PEM))
 
@@ -27,8 +28,6 @@ def test_happy_path():
 
 
 def test_aaguid():
-    nonce = os.urandom(32)
-    root_ca = load_pem_x509_certificate(Path('fixtures/root_cert.pem').read_bytes())
     attest, public_key = attest_factory.create(app_id='foo', nonce=nonce, aaguid=b'appattestdevelop', counter=0)
     config = AppleConfig(app_id='foo', root_ca=root_ca.public_bytes(serialization.Encoding.PEM), production=True)
 
@@ -38,8 +37,6 @@ def test_aaguid():
 
 
 def test_nonce():
-    nonce = os.urandom(32)
-    root_ca = load_pem_x509_certificate(Path('fixtures/root_cert.pem').read_bytes())
     attest, public_key = attest_factory.create(app_id='foo', nonce=nonce, aaguid=b'appattestdevelop', counter=0)
     config = AppleConfig(app_id='foo', root_ca=root_ca.public_bytes(serialization.Encoding.PEM))
 
@@ -49,8 +46,6 @@ def test_nonce():
 
 
 def test_key_id():
-    nonce = os.urandom(32)
-    root_ca = load_pem_x509_certificate(Path('fixtures/root_cert.pem').read_bytes())
     attest, public_key = attest_factory.create(app_id='foo', nonce=nonce, aaguid=b'appattestdevelop', counter=0)
     config = AppleConfig(app_id='foo', root_ca=root_ca.public_bytes(serialization.Encoding.PEM))
 
@@ -60,8 +55,6 @@ def test_key_id():
 
 
 def test_app_id():
-    nonce = os.urandom(32)
-    root_ca = load_pem_x509_certificate(Path('fixtures/root_cert.pem').read_bytes())
     attest, public_key = attest_factory.create(app_id='foo', nonce=nonce, aaguid=b'appattestdevelop', counter=0)
     config = AppleConfig(app_id='bar', root_ca=root_ca.public_bytes(serialization.Encoding.PEM))
 
@@ -71,8 +64,6 @@ def test_app_id():
 
 
 def test_counter():
-    nonce = os.urandom(32)
-    root_ca = load_pem_x509_certificate(Path('fixtures/root_cert.pem').read_bytes())
     attest, public_key = attest_factory.create(app_id='foo', nonce=nonce, aaguid=b'appattestdevelop', counter=9)
     config = AppleConfig(app_id='foo', root_ca=root_ca.public_bytes(serialization.Encoding.PEM))
 
@@ -82,8 +73,6 @@ def test_counter():
 
 
 def test_credential_id():
-    nonce = os.urandom(32)
-    root_ca = load_pem_x509_certificate(Path('fixtures/root_cert.pem').read_bytes())
     attest, public_key = attest_factory.create(app_id='foo', nonce=nonce, aaguid=b'appattestdevelop', counter=0,
                                                wrong_public_key=True)
     config = AppleConfig(app_id='foo', root_ca=root_ca.public_bytes(serialization.Encoding.PEM))

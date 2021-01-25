@@ -1,10 +1,8 @@
 import datetime
 
 from cryptography import x509, utils
-from cryptography.hazmat._oid import ObjectIdentifier
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization, hashes
-from cryptography.x509.extensions import ExtensionType
 from cryptography.x509.oid import NameOID
 
 key_usage = x509.KeyUsage(

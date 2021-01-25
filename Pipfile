@@ -14,6 +14,7 @@ certvalidator = "*"
 
 [scripts]
 tests = "pytest"
+coverage = "pytest --cov=pyattest tests/"
 
 [requires]
 python_version = "3.8.0"

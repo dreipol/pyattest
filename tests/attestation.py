@@ -19,8 +19,8 @@ from tests.generate_certificates import generate, key_usage
 
 def create(app_id: str, nonce: bytes, aaguid: bytes, counter: int, wrong_public_key: bool = False):
     """ Helper to create a fake apple attestation. """
-    root_key = load_pem_private_key(Path('fixtures/root_key.pem').read_bytes(), b'123')
-    root_cert = load_pem_x509_certificate(Path('fixtures/root_cert.pem').read_bytes())
+    root_key = load_pem_private_key(Path('tests/fixtures/root_key.pem').read_bytes(), b'123')
+    root_cert = load_pem_x509_certificate(Path('tests/fixtures/root_cert.pem').read_bytes())
 
     private_key = rsa.generate_private_key(
         public_exponent=65537,

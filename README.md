@@ -13,8 +13,8 @@ TBD
 ## Usage
 
 ```python
-config = AppleConfig(app_id='foo')
-attestation = Attestation(key_id, attest, nonce, config)
+config = AppleConfig(key_id=b'sha256_digest_of_public_key', app_id='foo')
+attestation = Attestation(attest, nonce, config)
 result = attestation.verify()
 ```
 

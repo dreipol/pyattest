@@ -6,11 +6,12 @@ verify_ssl = true
 [dev-packages]
 pytest-cov = "*"
 pytest = "*"
-cryptography = "*"
 
 [packages]
 cbor2 = "*"
 certvalidator = "*"
+pyjwt = "*"
+cryptography = "*"
 
 [scripts]
 tests = "pytest"

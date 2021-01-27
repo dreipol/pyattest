@@ -2,8 +2,7 @@ from pyattest.configs.config import Config
 
 
 class Attestation:
-    def __init__(self, key_id: bytes, data: bytes, nonce: bytes, config: Config):
-        self.key_id = key_id
+    def __init__(self, data: bytes, nonce: bytes, config: Config):
         self.data = data
         self.nonce = nonce
         self.config = config

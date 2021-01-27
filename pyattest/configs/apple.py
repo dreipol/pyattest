@@ -5,7 +5,8 @@ from pyattest.verifiers.apple import AppleVerifier
 class AppleConfig(Config):
     verifier_class = AppleVerifier
 
-    def __init__(self, app_id: str, production: bool = False, root_ca: bytes = None):
+    def __init__(self, key_id: bytes, app_id: str, production: bool = False, root_ca: bytes = None):
+        self.key_id = key_id
         self.app_id = app_id
         self.production = production
         self._custom_root_ca = root_ca

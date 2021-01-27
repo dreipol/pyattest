@@ -1,4 +1,3 @@
-import base64
 import struct
 from hashlib import sha256
 
@@ -17,7 +16,7 @@ from cbor2 import loads as cbor_decode
 class AppleVerifier(Verifier):
     def verify(self) -> bool:
         """
-        Verify the given dreiattest based on the Apple documentation. The dreiattest is CBOR encoded and after
+        Verify the given attestation based on the Apple documentation. The attestation is CBOR encoded and after
         decoding contains all relevant data according to the Webauthn specification.
 
         Raises a PyAttestException as soon as one of the verification steps fails.
@@ -105,7 +104,7 @@ class AppleVerifier(Verifier):
         identifier from your app.
         """
         expected_key_id = cert.public_key.sha256
-        if expected_key_id != self.attestation.key_id:
+        if expected_key_id != self.attestation.config.key_id:
             raise InvalidKeyIdException
 
         return True

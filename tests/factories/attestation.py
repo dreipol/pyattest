@@ -1,23 +1,67 @@
+import base64
 import datetime
 import struct
 from hashlib import sha256
 from pathlib import Path
 
-from asn1crypto.core import OctetString, Sequence
+import jwt
+from asn1crypto.core import OctetString
 from cbor2 import dumps as cbor_encode
-from cryptography import x509, utils
+from cryptography import x509
 from cryptography.hazmat._oid import ObjectIdentifier
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives.serialization.base import Encoding, load_pem_private_key
+from cryptography.hazmat.primitives.serialization.base import load_pem_private_key
 from cryptography.x509.base import load_pem_x509_certificate
-from cryptography.x509.extensions import ExtensionType, UnrecognizedExtension
+from cryptography.x509.extensions import UnrecognizedExtension
 from cryptography.x509.oid import NameOID
 
-from tests.generate_certificates import generate, key_usage
+from tests.factories.certificates import key_usage
 
 
-def create(app_id: str, nonce: bytes, aaguid: bytes, counter: int, wrong_public_key: bool = False):
+def google(apk_package_name: str, nonce: bytes):
+    """ Helper to create a fake google attestation. """
+    root_key = load_pem_private_key(Path('tests/fixtures/root_key.pem').read_bytes(), b'123')
+    root_cert = load_pem_x509_certificate(Path('tests/fixtures/root_cert.pem').read_bytes())
+
+    private_key = rsa.generate_private_key(
+        public_exponent=65537,
+        key_size=2048,
+    )
+    public_key = private_key.public_key().public_bytes(encoding=serialization.Encoding.DER,
+                                                       format=serialization.PublicFormat.PKCS1)
+
+    subject = x509.Name([x509.NameAttribute(NameOID.ORGANIZATION_NAME, 'pyattest-testing-leaf')])
+    cert = x509.CertificateBuilder() \
+        .subject_name(subject) \
+        .issuer_name(root_cert.subject) \
+        .public_key(private_key.public_key()) \
+        .serial_number(x509.random_serial_number()) \
+        .not_valid_before(datetime.datetime.utcnow()) \
+        .not_valid_after(datetime.datetime.utcnow() + datetime.timedelta(days=10)) \
+        .add_extension(key_usage, critical=False) \
+        .sign(root_key, hashes.SHA256())
+
+    data = {
+        'timestampMs': 9860437986543,
+        'nonce': base64.b64encode(nonce).decode(),
+        'apkPackageName': apk_package_name,
+        'apkCertificateDigestSha256': '',
+        'ctsProfileMatch': True,
+        'basicIntegrity': True,
+        'evaluationType': 'BASIC'
+    }
+
+    headers = {'x5c': [
+        cert.public_bytes(serialization.Encoding.PEM).decode(),
+        root_cert.public_bytes(serialization.Encoding.PEM).decode(),
+    ]}
+
+    return jwt.encode(data, '', algorithm='HS256', headers=headers), public_key
+
+
+def apple(app_id: str, nonce: bytes, aaguid: bytes = b'appattestdevelop', counter: int = 0,
+          wrong_public_key: bool = False):
     """ Helper to create a fake apple attestation. """
     root_key = load_pem_private_key(Path('tests/fixtures/root_key.pem').read_bytes(), b'123')
     root_cert = load_pem_x509_certificate(Path('tests/fixtures/root_cert.pem').read_bytes())
@@ -57,7 +101,7 @@ def create(app_id: str, nonce: bytes, aaguid: bytes, counter: int, wrong_public_
         .add_extension(UnrecognizedExtension(ObjectIdentifier('1.2.840.113635.100.8.2'), der_nonce), critical=False) \
         .sign(root_key, hashes.SHA256())
 
-    foo = {
+    data = {
         'fmt': 'apple-appattest',
         'attStmt': {
             'x5c': [
@@ -69,4 +113,4 @@ def create(app_id: str, nonce: bytes, aaguid: bytes, counter: int, wrong_public_
         'authData': auth_data,
     }
 
-    return cbor_encode(foo), public_key
+    return cbor_encode(data), public_key

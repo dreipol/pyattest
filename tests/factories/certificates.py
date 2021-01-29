@@ -22,14 +22,15 @@ def generate():
     """ Generate root and intermediate certificates for the apple attestation. """
     root_private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048, )
 
-    with open('../fixtures/root_key.pem', 'wb') as f:
+    with open('tests/fixtures/root_key.pem', 'wb') as f:
         f.write(root_private_key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.TraditionalOpenSSL,
             encryption_algorithm=serialization.BestAvailableEncryption(b'123'),
         ))
 
-    subject = issuer = x509.Name([x509.NameAttribute(NameOID.ORGANIZATION_NAME, 'pyattest-testing-ca')])
+    # add server_auth?
+    subject = issuer = x509.Name([x509.NameAttribute(NameOID.ORGANIZATION_NAME, 'pyattest-testing-ca.ch')])
     cert = x509.CertificateBuilder() \
         .subject_name(subject) \
         .issuer_name(issuer) \
@@ -40,5 +41,5 @@ def generate():
         .add_extension(key_usage, critical=False) \
         .sign(root_private_key, hashes.SHA256())
 
-    with open('../fixtures/root_cert.pem', 'wb') as f:
+    with open('tests/fixtures/root_cert.pem', 'wb') as f:
         f.write(cert.public_bytes(serialization.Encoding.PEM))

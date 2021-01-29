@@ -11,7 +11,7 @@ from cryptography import x509
 from cryptography.hazmat._oid import ObjectIdentifier
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives.serialization.base import load_pem_private_key
+from cryptography.hazmat.primitives.serialization.base import load_pem_private_key, NoEncryption
 from cryptography.x509.base import load_pem_x509_certificate
 from cryptography.x509.extensions import UnrecognizedExtension
 from cryptography.x509.oid import NameOID
@@ -19,7 +19,7 @@ from cryptography.x509.oid import NameOID
 from tests.factories.certificates import key_usage
 
 
-def google(apk_package_name: str, nonce: bytes):
+def google(apk_package_name: str, nonce: bytes, basic_integrity: bool = True, cts_profile: bool = True):
     """ Helper to create a fake google attestation. """
     root_key = load_pem_private_key(Path('tests/fixtures/root_key.pem').read_bytes(), b'123')
     root_cert = load_pem_x509_certificate(Path('tests/fixtures/root_cert.pem').read_bytes())
@@ -46,18 +46,18 @@ def google(apk_package_name: str, nonce: bytes):
         'timestampMs': 9860437986543,
         'nonce': base64.b64encode(nonce).decode(),
         'apkPackageName': apk_package_name,
-        'apkCertificateDigestSha256': '',
-        'ctsProfileMatch': True,
-        'basicIntegrity': True,
+        'apkCertificateDigestSha256': [],
+        'ctsProfileMatch': cts_profile,
+        'basicIntegrity': basic_integrity,
         'evaluationType': 'BASIC'
     }
 
     headers = {'x5c': [
-        cert.public_bytes(serialization.Encoding.PEM).decode(),
-        root_cert.public_bytes(serialization.Encoding.PEM).decode(),
+        cert.public_bytes(serialization.Encoding.PEM).decode().replace('-----BEGIN CERTIFICATE-----\n', '').replace('\n-----END CERTIFICATE-----\n', ''),
+        root_cert.public_bytes(serialization.Encoding.PEM).decode().replace('-----BEGIN CERTIFICATE-----\n', '').replace('\n-----END CERTIFICATE-----\n', ''),
     ]}
 
-    return jwt.encode(data, '', algorithm='HS256', headers=headers), public_key
+    return jwt.encode(data, private_key, algorithm='RS256', headers=headers), public_key
 
 
 def apple(app_id: str, nonce: bytes, aaguid: bytes = b'appattestdevelop', counter: int = 0,

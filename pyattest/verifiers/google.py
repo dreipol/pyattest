@@ -3,7 +3,7 @@ from typing import List, Optional
 
 import jwt
 from asn1crypto import pem
-from certvalidator import CertificateValidator
+from certvalidator import CertificateValidator, ValidationContext
 from certvalidator.errors import PathValidationError
 from certvalidator.path import ValidationPath
 from jwt import InvalidTokenError
@@ -95,8 +95,14 @@ class GoogleVerifier(Verifier):
         """
         Validate the SSL certificate chain and use SSL hostname matching to verify that the leaf certificate was
         issued to the hostname attest.android.com.
+
+        We'll also allow to inject custom root ca for unittesting.
         """
-        validator = CertificateValidator(chain[0], chain[1:])
+        context = None
+        if self.attestation.config.root_ca:
+            context = ValidationContext(extra_trust_roots=[self.attestation.config.root_ca])
+
+        validator = CertificateValidator(chain[0], chain[1:], validation_context=context)
 
         try:
             return validator.validate_tls(self.attestation.config.root_cn)

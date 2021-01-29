@@ -27,6 +27,7 @@ def test_apple():
     assert 1 == 1
 
 
+@pytest.mark.skip(reason='only internal')
 def test_google():
     key_id = b'noideayet'
     nonce = str.encode('f81d4fae-7dec-11d0-a765-00a0c91e6bf6')

@@ -1,5 +1,4 @@
 from pyattest.configs.config import Config
-from pyattest.verifiers.apple import AppleVerifier
 from pyattest.verifiers.google import GoogleVerifier
 
 

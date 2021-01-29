@@ -1,8 +1,10 @@
+from typing import Union
+
 from pyattest.configs.config import Config
 
 
 class Attestation:
-    def __init__(self, data: bytes, nonce: bytes, config: Config):
+    def __init__(self, data: Union[bytes, str], nonce: bytes, config: Config):
         self.data = data
         self.nonce = nonce
         self.config = config

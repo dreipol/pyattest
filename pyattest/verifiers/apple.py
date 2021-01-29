@@ -112,7 +112,7 @@ class AppleVerifier(Verifier):
     def verify_nonce(self, auth_data: bytes, nonce: bytes, cert: Certificate) -> bool:
         """
         Create clientDataHash as the SHA256 hash of the one-time challenge sent to your app before performing the
-        dreiattest, and append that hash to the end of the authenticator data (authData from the decoded object).
+        attest_apple, and append that hash to the end of the authenticator data (authData from the decoded object).
 
         Generate a new SHA256 hash of the composite item to create nonce.
 
@@ -158,8 +158,8 @@ class AppleVerifier(Verifier):
 
         try:
             return validator.validate_usage({'digital_signature'})
-        except PathValidationError:
-            raise InvalidCertificateChainException
+        except PathValidationError as exception:
+            raise InvalidCertificateChainException from exception
 
     def _get_extension(self, name: str, cert: Certificate) -> Extension:
         """ Helper method to get a specific x509 extension from a given certificate. """

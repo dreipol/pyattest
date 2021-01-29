@@ -2,6 +2,18 @@ class PyAttestException(Exception):
     pass
 
 
+class InvalidJWT(PyAttestException):
+    pass
+
+
+class InvalidBasicIntegrity(PyAttestException):
+    pass
+
+
+class InvalidCtsProfile(PyAttestException):
+    pass
+
+
 class ExtensionNotFoundException(PyAttestException):
     pass
 

@@ -1,5 +1,7 @@
 from hashlib import sha256
 
+import pytest
+
 from pyattest.attestation import Attestation
 from pyattest.configs.google import GoogleConfig
 from tests.factories import attestation as attest_factory
@@ -9,6 +11,7 @@ root_cn = 'pyattest-testing-ca'
 nonce = os.urandom(32)
 
 
+@pytest.mark.skip(reason='placeholder')
 def test_happy_path():
     """ Test the basic attest verification where everything works like it should :) """
     attest, public_key = attest_factory.google(apk_package_name='foo', nonce=nonce)

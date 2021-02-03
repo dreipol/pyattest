@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from pyattest.configs.config import Config
 from pyattest.verifiers.google import GoogleVerifier
@@ -7,11 +7,11 @@ from pyattest.verifiers.google import GoogleVerifier
 class GoogleConfig(Config):
     verifier_class = GoogleVerifier
 
-    def __init__(self, key_id: bytes, apk_package_name: str, apk_hash: bytes,
+    def __init__(self, key_ids: List[bytes], apk_package_name: str, production: bool = False,
                  root_cn: str = 'attest.android.com', root_ca: bytes = None):
-        self.key_id = key_id
+        self.key_ids = key_ids
         self.apk_package_name = apk_package_name
-        self.apk_hash = apk_hash
+        self.production = production
         self.root_cn = root_cn
         self._custom_root_ca = root_ca
 

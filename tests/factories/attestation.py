@@ -40,6 +40,7 @@ def google(apk_package_name: str, nonce: bytes, basic_integrity: bool = True, ct
         .not_valid_before(datetime.datetime.utcnow()) \
         .not_valid_after(datetime.datetime.utcnow() + datetime.timedelta(days=10)) \
         .add_extension(key_usage, critical=False) \
+        .add_extension(x509.SubjectAlternativeName([x509.DNSName('pyattest-testing-leaf.ch')]), critical=False) \
         .sign(root_key, hashes.SHA256())
 
     data = {

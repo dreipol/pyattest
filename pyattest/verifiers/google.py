@@ -27,8 +27,12 @@ class GoogleVerifier(Verifier):
         certificate_chain, data = self.unpack(self.attestation.data)
         self.verify_nonce(data.get('nonce', None))
         self.verify_apk_package_name(data.get('apkPackageName', None))
-        self.verify_basic_integrity(data.get('basicIntegrity', False))
-        self.verify_cts_profile(data.get('ctsProfileMatch', False))
+
+        # We'll only validate basic integrity and cts profile on production
+        if self.attestation.config.production:
+            self.verify_basic_integrity(data.get('basicIntegrity', False))
+            self.verify_cts_profile(data.get('ctsProfileMatch', False))
+
         self.verify_key_id(data.get('apkCertificateDigestSha256', False))
 
         return True
@@ -50,8 +54,15 @@ class GoogleVerifier(Verifier):
         return certificate_chain, data
 
     def verify_key_id(self, key_ids: Optional[list]) -> bool:
-        for key in key_ids:
-            if key != self.attestation.config.key_id:
+        """
+        The apkCertificateDigestSha256 can hold multiple certificates and we're comparing them against the list
+        of key ids in our config.
+        """
+        if not key_ids or len(key_ids) != len(self.attestation.config.key_ids):
+            raise InvalidKeyIdException
+
+        for index, key in enumerate(key_ids):
+            if key.encode() != self.attestation.config.key_ids[index]:
                 raise InvalidKeyIdException
 
         return True

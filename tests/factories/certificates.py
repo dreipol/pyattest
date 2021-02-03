@@ -30,7 +30,7 @@ def generate():
         ))
 
     # add server_auth?
-    subject = issuer = x509.Name([x509.NameAttribute(NameOID.ORGANIZATION_NAME, 'pyattest-testing-ca.ch')])
+    subject = issuer = x509.Name([x509.NameAttribute(NameOID.ORGANIZATION_NAME, 'pyattest-testing-ca')])
     cert = x509.CertificateBuilder() \
         .subject_name(subject) \
         .issuer_name(issuer) \

@@ -13,6 +13,7 @@ from pyattest.exceptions import InvalidAaguidException, InvalidNonceException, I
 from tests.factories import attestation as attest_factory
 
 root_ca = load_pem_x509_certificate(Path('tests/fixtures/root_cert.pem').read_bytes())
+root_ca_pem = root_ca.public_bytes(serialization.Encoding.PEM)
 nonce = os.urandom(32)
 
 
@@ -20,7 +21,7 @@ def test_happy_path():
     """ Test the basic attest verification where everything works like it should :) """
     attest, public_key = attest_factory.apple(app_id='foo', nonce=nonce)
     key_id = sha256(public_key).digest()
-    config = AppleConfig(key_id=key_id, app_id='foo', root_ca=root_ca.public_bytes(serialization.Encoding.PEM))
+    config = AppleConfig(key_id=key_id, app_id='foo', root_ca=root_ca_pem)
 
     attestation = Attestation(attest, nonce, config)
     result = attestation.verify()
@@ -31,7 +32,7 @@ def test_happy_path():
 def test_aaguid():
     attest, public_key = attest_factory.apple(app_id='foo', nonce=nonce)
     key_id = sha256(public_key).digest()
-    config = AppleConfig(key_id=key_id, app_id='foo', root_ca=root_ca.public_bytes(serialization.Encoding.PEM),
+    config = AppleConfig(key_id=key_id, app_id='foo', root_ca=root_ca_pem,
                          production=True)
 
     attestation = Attestation(attest, nonce, config)
@@ -42,7 +43,7 @@ def test_aaguid():
 def test_nonce():
     attest, public_key = attest_factory.apple(app_id='foo', nonce=nonce)
     key_id = sha256(public_key).digest()
-    config = AppleConfig(key_id=key_id, app_id='foo', root_ca=root_ca.public_bytes(serialization.Encoding.PEM))
+    config = AppleConfig(key_id=key_id, app_id='foo', root_ca=root_ca_pem)
 
     attestation = Attestation(attest, os.urandom(32), config)
     with raises(InvalidNonceException):
@@ -52,7 +53,7 @@ def test_nonce():
 def test_key_id():
     attest, public_key = attest_factory.apple(app_id='foo', nonce=nonce)
     key_id = sha256(b'invalid_public_key').digest()
-    config = AppleConfig(key_id=key_id, app_id='foo', root_ca=root_ca.public_bytes(serialization.Encoding.PEM))
+    config = AppleConfig(key_id=key_id, app_id='foo', root_ca=root_ca_pem)
 
     attestation = Attestation(attest, nonce, config)
     with raises(InvalidKeyIdException):
@@ -62,7 +63,7 @@ def test_key_id():
 def test_app_id():
     attest, public_key = attest_factory.apple(app_id='foo', nonce=nonce)
     key_id = sha256(public_key).digest()
-    config = AppleConfig(key_id=key_id, app_id='bar', root_ca=root_ca.public_bytes(serialization.Encoding.PEM))
+    config = AppleConfig(key_id=key_id, app_id='bar', root_ca=root_ca_pem)
 
     attestation = Attestation(attest, nonce, config)
     with raises(InvalidAppIdException):
@@ -72,7 +73,7 @@ def test_app_id():
 def test_counter():
     attest, public_key = attest_factory.apple(app_id='foo', nonce=nonce, aaguid=b'appattestdevelop', counter=9)
     key_id = sha256(public_key).digest()
-    config = AppleConfig(key_id=key_id, app_id='foo', root_ca=root_ca.public_bytes(serialization.Encoding.PEM))
+    config = AppleConfig(key_id=key_id, app_id='foo', root_ca=root_ca_pem)
 
     attestation = Attestation(attest, nonce, config)
     with raises(InvalidCounterException):
@@ -82,7 +83,7 @@ def test_counter():
 def test_credential_id():
     attest, public_key = attest_factory.apple(app_id='foo', nonce=nonce, wrong_public_key=True)
     key_id = sha256(public_key).digest()
-    config = AppleConfig(key_id=key_id, app_id='foo', root_ca=root_ca.public_bytes(serialization.Encoding.PEM))
+    config = AppleConfig(key_id=key_id, app_id='foo', root_ca=root_ca_pem)
 
     attestation = Attestation(attest, nonce, config)
     with raises(InvalidCredentialIdException):

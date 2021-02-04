@@ -4,7 +4,7 @@ from typing import List, Optional
 import jwt
 from asn1crypto import pem
 from certvalidator import CertificateValidator, ValidationContext
-from certvalidator.errors import PathValidationError
+from certvalidator.errors import PathValidationError, PathBuildingError
 from certvalidator.path import ValidationPath
 from jwt import InvalidTokenError
 
@@ -117,5 +117,5 @@ class GoogleVerifier(Verifier):
 
         try:
             return validator.validate_tls(self.attestation.config.root_cn)
-        except PathValidationError as exception:
+        except (PathBuildingError, PathValidationError) as exception:
             raise InvalidCertificateChainException from exception

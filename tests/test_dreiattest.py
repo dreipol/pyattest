@@ -28,7 +28,6 @@ def test_apple():
     assert 1 == 1
 
 
-@pytest.mark.skip(reason='only internal')
 def test_google():
     nonce = str.encode('f81d4fae-7dec-11d0-a765-00a0c91e6bf6')
     cert = """-----BEGIN CERTIFICATE-----
@@ -53,7 +52,7 @@ gmrBM2lV/sP0yrlkA73bEXMMo1HWC/MD8QTc1cREy/3C91iQsIoqY4NJ4ao4bwOf
     cert = x509.Certificate.load(der_bytes)
 
     config = GoogleConfig(key_ids=[base64.b64encode(cert.sha256)], apk_package_name='ch.dreipol.rezhycle',
-                          production=False, apk_hash=b'')
+                          production=False)
     attest = Path('tests/fixtures/attest_google').read_text().rstrip()
 
     attestation = Attestation(attest, nonce, config)

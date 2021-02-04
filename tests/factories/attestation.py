@@ -20,7 +20,7 @@ from tests.factories.certificates import key_usage
 
 
 def google(apk_package_name: str, nonce: bytes, basic_integrity: bool = True, cts_profile: bool = True,
-           apk_cert_digest: str = None):
+           apk_cert_digest: bytes = None):
     """ Helper to create a fake google attestation. """
     root_key = load_pem_private_key(Path('tests/fixtures/root_key.pem').read_bytes(), b'123')
     root_cert = load_pem_x509_certificate(Path('tests/fixtures/root_cert.pem').read_bytes())

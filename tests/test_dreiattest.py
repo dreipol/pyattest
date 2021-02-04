@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pytest
 from asn1crypto import pem, x509
-from cryptography.x509.base import load_pem_x509_certificate
 
 from pyattest.attestation import Attestation
 from pyattest.configs.apple import AppleConfig
@@ -29,6 +28,7 @@ def test_apple():
     assert 1 == 1
 
 
+@pytest.mark.skip(reason='only internal')
 def test_google():
     nonce = str.encode('f81d4fae-7dec-11d0-a765-00a0c91e6bf6')
     cert = """-----BEGIN CERTIFICATE-----

@@ -19,17 +19,17 @@ from cryptography.x509.oid import NameOID
 from tests.factories.certificates import key_usage
 
 
-def google(apk_package_name: str, nonce: bytes, basic_integrity: bool = True, cts_profile: bool = True):
+def google(apk_package_name: str, nonce: bytes, basic_integrity: bool = True, cts_profile: bool = True,
+           apk_cert_digest: str = None):
     """ Helper to create a fake google attestation. """
     root_key = load_pem_private_key(Path('tests/fixtures/root_key.pem').read_bytes(), b'123')
     root_cert = load_pem_x509_certificate(Path('tests/fixtures/root_cert.pem').read_bytes())
+    apk_cert_digest = apk_cert_digest or b'foobar'
 
     private_key = rsa.generate_private_key(
         public_exponent=65537,
         key_size=2048,
     )
-    public_key = private_key.public_key().public_bytes(encoding=serialization.Encoding.DER,
-                                                       format=serialization.PublicFormat.PKCS1)
 
     subject = x509.Name([x509.NameAttribute(NameOID.ORGANIZATION_NAME, 'pyattest-testing-leaf')])
     cert = x509.CertificateBuilder() \
@@ -47,18 +47,21 @@ def google(apk_package_name: str, nonce: bytes, basic_integrity: bool = True, ct
         'timestampMs': 9860437986543,
         'nonce': base64.b64encode(nonce).decode(),
         'apkPackageName': apk_package_name,
-        'apkCertificateDigestSha256': [],
+        'apkCertificateDigestSha256': [base64.b64encode(apk_cert_digest).decode()],
         'ctsProfileMatch': cts_profile,
         'basicIntegrity': basic_integrity,
         'evaluationType': 'BASIC'
     }
 
     headers = {'x5c': [
-        cert.public_bytes(serialization.Encoding.PEM).decode().replace('-----BEGIN CERTIFICATE-----\n', '').replace('\n-----END CERTIFICATE-----\n', ''),
-        root_cert.public_bytes(serialization.Encoding.PEM).decode().replace('-----BEGIN CERTIFICATE-----\n', '').replace('\n-----END CERTIFICATE-----\n', ''),
+        cert.public_bytes(serialization.Encoding.PEM).decode().replace('-----BEGIN CERTIFICATE-----\n', '').replace(
+            '\n-----END CERTIFICATE-----\n', ''),
+        root_cert.public_bytes(serialization.Encoding.PEM).decode().replace('-----BEGIN CERTIFICATE-----\n',
+                                                                            '').replace('\n-----END CERTIFICATE-----\n',
+                                                                                        ''),
     ]}
 
-    return jwt.encode(data, private_key, algorithm='RS256', headers=headers), public_key
+    return jwt.encode(data, private_key, algorithm='RS256', headers=headers), apk_cert_digest
 
 
 def apple(app_id: str, nonce: bytes, aaguid: bytes = b'appattestdevelop', counter: int = 0,

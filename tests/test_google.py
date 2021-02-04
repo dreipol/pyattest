@@ -1,3 +1,4 @@
+import base64
 from hashlib import sha256
 from pathlib import Path
 
@@ -16,14 +17,12 @@ root_ca_pem = root_ca.public_bytes(serialization.Encoding.PEM)
 nonce = os.urandom(32)
 
 
-@pytest.mark.skip(reason='skip')
 def test_happy_path():
     """ Test the basic attest verification where everything works like it should :) """
     # TODO: Generate a cert sha256 and return that as key_id in form the factory.
     #       This needs to be apkCertificateDigestSha256.
-    attest, public_key = attest_factory.google(apk_package_name='foo', nonce=nonce)
-    key_id = sha256(public_key).digest()
-    config = GoogleConfig(key_ids=[key_id], apk_package_name='foo', root_cn=root_cn,
+    attest, key_id = attest_factory.google(apk_package_name='foo', nonce=nonce)
+    config = GoogleConfig(key_ids=[base64.b64encode(key_id)], apk_package_name='foo', root_cn=root_cn,
                           root_ca=root_ca_pem)
 
     attestation = Attestation(attest, nonce, config)

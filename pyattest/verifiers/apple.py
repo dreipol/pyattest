@@ -3,7 +3,7 @@ from hashlib import sha256
 
 from asn1crypto.x509 import Certificate, Extension
 from certvalidator import CertificateValidator, ValidationContext
-from certvalidator.errors import PathValidationError
+from certvalidator.errors import PathValidationError, PathBuildingError
 from certvalidator.path import ValidationPath
 
 from pyattest.exceptions import ExtensionNotFoundException, InvalidNonceException, InvalidKeyIdException, \
@@ -32,7 +32,7 @@ class AppleVerifier(Verifier):
         credential_data    Variable length, contains the credential_id and credential_public_key. The length is
                            set at byte 17 and 18.
         """
-        data = self.unpack(self.attestation.data)
+        data = self.unpack(self.attestation.raw)
 
         chain = self.verify_certificate_chain(data['raw']['attStmt']['x5c'])
         self.verify_nonce(data['raw']['authData'], self.attestation.nonce, chain[-1])
@@ -41,6 +41,8 @@ class AppleVerifier(Verifier):
         self.verify_counter(data['counter'])
         self.verify_aaguid(data['aaguid'])
         self.verify_credential_id(data['credential_id'], chain[-1])
+
+        self.attestation.verified_data({'data': data, 'certs': chain})
 
         return True
 
@@ -158,7 +160,7 @@ class AppleVerifier(Verifier):
 
         try:
             return validator.validate_usage({'digital_signature'})
-        except PathValidationError as exception:
+        except (PathBuildingError, PathValidationError) as exception:
             raise InvalidCertificateChainException from exception
 
     def _get_extension(self, name: str, cert: Certificate) -> Extension:

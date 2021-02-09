@@ -1,5 +1,5 @@
 import base64
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import jwt
 from asn1crypto import pem
@@ -24,7 +24,7 @@ class GoogleVerifier(Verifier):
         Apple Documentation https://developer.android.com/training/safetynet/attestation
         JWS RFC https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-36
         """
-        certificate_chain, data = self.unpack(self.attestation.data)
+        certificate_chain, data = self.unpack(self.attestation.raw)
         self.verify_nonce(data.get('nonce', None))
         self.verify_apk_package_name(data.get('apkPackageName', None))
 
@@ -35,9 +35,11 @@ class GoogleVerifier(Verifier):
 
         self.verify_key_id(data.get('apkCertificateDigestSha256', False))
 
+        self.attestation.verified_data({'data': data, 'certs': certificate_chain})
+
         return True
 
-    def unpack(self, jwt_object: str):
+    def unpack(self, jwt_object: str) -> Tuple[ValidationPath, dict]:
         """
         We first need to get the unverified headers to get a hold of the certificate so we can use the certs
         public key to verify the jwt objects signature. The certificate chain needs to be validated first.

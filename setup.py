@@ -12,15 +12,20 @@ from shutil import rmtree
 from setuptools import find_packages, setup, Command
 
 # Package meta-data.
-NAME = 'payttest'
-DESCRIPTION = 'Native app attest_apple made easy'
+NAME = 'pyattest'
+DESCRIPTION = ''
 URL = 'https://github.com/dreipol/pyattest'
 EMAIL = 'dev@dreipol.ch'
 AUTHOR = 'dreipol'
 REQUIRES_PYTHON = '>=3.6.0'
 VERSION = None
 
-REQUIRED = []
+REQUIRED = [
+    'cbor2',
+    'certvalidator',
+    'pyjwt',
+    'cryptography',
+]
 
 here = os.path.abspath(os.path.dirname(__file__))
 

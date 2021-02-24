@@ -21,7 +21,7 @@ class GoogleVerifier(Verifier):
         Raises a PyAttestException as soon as one of the verification steps fails.
 
         See also:
-        Apple Documentation https://developer.android.com/training/safetynet/attestation
+        Google Documentation https://developer.android.com/training/safetynet/attestation
         JWS RFC https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-36
         """
         certificate_chain, data = self.unpack(self.attestation.raw)

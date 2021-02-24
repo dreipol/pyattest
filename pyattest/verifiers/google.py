@@ -14,7 +14,7 @@ from pyattest.verifiers.verifier import Verifier
 
 
 class GoogleVerifier(Verifier):
-    def verify(self) -> bool:
+    def verify(self):
         """
         Verify the given attestation based on the Google documentation. The attestation is formatted as JWS object.
 
@@ -37,8 +37,6 @@ class GoogleVerifier(Verifier):
 
         self.attestation.verified_data({'data': data, 'certs': certificate_chain})
 
-        return True
-
     def unpack(self, jwt_object: str) -> Tuple[ValidationPath, dict]:
         """
         We first need to get the unverified headers to get a hold of the certificate so we can use the certs
@@ -55,7 +53,7 @@ class GoogleVerifier(Verifier):
 
         return certificate_chain, data
 
-    def verify_key_id(self, key_ids: Optional[list]) -> bool:
+    def verify_key_id(self, key_ids: Optional[list]):
         """
         The apkCertificateDigestSha256 can hold multiple certificates and we're comparing them against the list
         of key ids in our config.
@@ -67,31 +65,21 @@ class GoogleVerifier(Verifier):
             if key.encode() != self.attestation.config.key_ids[index]:
                 raise InvalidKeyIdException
 
-        return True
-
-    def verify_cts_profile(self, cts_profile: bool) -> bool:
+    def verify_cts_profile(self, cts_profile: bool):
         if not cts_profile:
             raise InvalidCtsProfile
 
-        return True
-
-    def verify_basic_integrity(self, basic_integrity: bool) -> bool:
+    def verify_basic_integrity(self, basic_integrity: bool):
         if not basic_integrity:
             raise InvalidBasicIntegrity
 
-        return True
-
-    def verify_apk_package_name(self, package_name: Optional[str]) -> bool:
+    def verify_apk_package_name(self, package_name: Optional[str]):
         if not package_name or package_name != self.attestation.config.apk_package_name:
             raise InvalidAppIdException
 
-        return True
-
-    def verify_nonce(self, nonce: str) -> bool:
+    def verify_nonce(self, nonce: str):
         if base64.b64decode(nonce) != self.attestation.nonce:
             raise InvalidNonceException
-
-        return True
 
     def _get_certificates(self, header: dict) -> ValidationPath:
         """

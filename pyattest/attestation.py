@@ -20,8 +20,8 @@ class Attestation:
 
         return self._verified_data
 
-    def verify(self) -> bool:
-        return self.config.verifier_class(self).verify()
+    def verify(self):
+        self.config.verifier_class(self).verify()
 
     def verified_data(self, data: dict):
         """ The verifier from the config can set all relevant data once the verification is complete. """

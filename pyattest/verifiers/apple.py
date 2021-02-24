@@ -14,7 +14,7 @@ from cbor2 import loads as cbor_decode
 
 
 class AppleVerifier(Verifier):
-    def verify(self) -> bool:
+    def verify(self):
         """
         Verify the given attestation based on the Apple documentation. The attestation is CBOR encoded and after
         decoding contains all relevant data according to the Webauthn specification.
@@ -44,9 +44,8 @@ class AppleVerifier(Verifier):
 
         self.attestation.verified_data({'data': data, 'certs': chain})
 
-        return True
-
-    def unpack(self, raw: bytes) -> dict:
+    @staticmethod
+    def unpack(raw: bytes) -> dict:
         """ Extract in `verify` method mentioned relevant data from cbor encoded raw bytes input. """
         raw = cbor_decode(raw)
 
@@ -61,12 +60,11 @@ class AppleVerifier(Verifier):
             'credential_id': credential_data[18:18 + credential_id_length],
         }
 
-    def verify_credential_id(self, credential_id: bytes, cert: Certificate) -> bool:
+    @staticmethod
+    def verify_credential_id(credential_id: bytes, cert: Certificate):
         """ Verify that the authenticator data’s credentialId field is the same as the key identifier. """
         if credential_id != cert.public_key.sha256:
             raise InvalidCredentialIdException
-
-        return True
 
     def verify_aaguid(self, aaguid: bytes):
         """
@@ -76,21 +74,20 @@ class AppleVerifier(Verifier):
         See also: https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_developer_devicecheck_appattest-environment
         """
         if self.attestation.config.production and aaguid == b'appattest\x00\x00\x00\x00\x00\x00\x00':
-            return True
+            return
 
         if not self.attestation.config.production and aaguid == b'appattestdevelop':
-            return True
+            return
 
         raise InvalidAaguidException
 
-    def verify_counter(self, counter: int) -> bool:
+    @staticmethod
+    def verify_counter(counter: int):
         """ Verify that the authenticator data’s counter field equals 0. """
         if counter != 0:
             raise InvalidCounterException
 
-        return True
-
-    def verify_app_id(self, rp_id: bytes) -> bool:
+    def verify_app_id(self, rp_id: bytes):
         """
         Compute the SHA-256 hash of your app’s App ID, and verify that this is the same as the authenticator
         data’s RP ID hash.
@@ -98,9 +95,7 @@ class AppleVerifier(Verifier):
         if rp_id != sha256(self.attestation.config.app_id.encode()).digest():
             raise InvalidAppIdException
 
-        return True
-
-    def verify_key_id(self, cert: Certificate) -> bool:
+    def verify_key_id(self, cert: Certificate):
         """
         Create the SHA-256 hash of the public key in credCert, and verify that it matches the key
         identifier from your app.
@@ -109,9 +104,7 @@ class AppleVerifier(Verifier):
         if expected_key_id != self.attestation.config.key_id:
             raise InvalidKeyIdException
 
-        return True
-
-    def verify_nonce(self, auth_data: bytes, nonce: bytes, cert: Certificate) -> bool:
+    def verify_nonce(self, auth_data: bytes, nonce: bytes, cert: Certificate):
         """
         Create clientDataHash as the SHA-256 hash of the one-time challenge sent to your app before performing the
         attest_apple, and append that hash to the end of the authenticator data (authData from the decoded object).
@@ -143,8 +136,6 @@ class AppleVerifier(Verifier):
         expected_nonce = extension[2].contents[6:]
         if calculated_nonce != expected_nonce:
             raise InvalidNonceException
-
-        return True
 
     def verify_certificate_chain(self, chain: list) -> ValidationPath:
         """

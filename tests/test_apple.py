@@ -24,9 +24,7 @@ def test_happy_path():
     config = AppleConfig(key_id=key_id, app_id='foo', root_ca=root_ca_pem)
 
     attestation = Attestation(attest, nonce, config)
-    result = attestation.verify()
-
-    assert result is True
+    attestation.verify()
 
 
 def test_aaguid():

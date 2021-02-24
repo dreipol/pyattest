@@ -25,10 +25,7 @@ def test_happy_path():
                           root_ca=root_ca_pem)
 
     attestation = Attestation(attest, nonce, config)
-    result = attestation.verify()
-
-    assert result is True
-
+    attestation.verify()
 
 def test_key_id():
     attest, key_id = attest_factory.google(apk_package_name='foo', nonce=nonce)

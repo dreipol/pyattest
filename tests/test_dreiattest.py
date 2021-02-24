@@ -25,8 +25,6 @@ def test_apple():
     attestation = Attestation(base64.b64decode(attest), nonce, config)
     attestation.verify()
 
-    assert 1 == 1
-
 
 def test_google():
     nonce = str.encode('f81d4fae-7dec-11d0-a765-00a0c91e6bf6')
@@ -56,6 +54,4 @@ gmrBM2lV/sP0yrlkA73bEXMMo1HWC/MD8QTc1cREy/3C91iQsIoqY4NJ4ao4bwOf
     attest = Path('tests/fixtures/attest_google').read_text().rstrip()
 
     attestation = Attestation(attest, nonce, config)
-    result = attestation.verify()
-
-    assert result is True
+    attestation.verify()

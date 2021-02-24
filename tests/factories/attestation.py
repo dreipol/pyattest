@@ -84,7 +84,7 @@ def apple(app_id: str, nonce: bytes, aaguid: bytes = b'appattestdevelop', counte
                  + b'\x00'  # Flag, we'll fill it with zero
                  + struct.pack('!I', counter)
                  + aaguid  # TODO: Fillup to ensure 16 bytes
-                 + struct.pack('!H', 32)  # Our sha256 digest is always 32bytes
+                 + struct.pack('!H', 32)  # Our SHA-256 digest is always 32bytes
                  + sha256(auth_data_public_key).digest())
 
     nonce = sha256(auth_data + sha256(nonce).digest())

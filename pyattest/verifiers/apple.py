@@ -26,7 +26,7 @@ class AppleVerifier(Verifier):
         Webauthn Specification https://www.w3.org/TR/webauthn/#fig-attStructs
 
         Relevant Data:
-        rp_id              AppId sha256 digest
+        rp_id              AppId SHA-256 digest
         counter            The number of times the app used the attested key to sign an assertion.
         aaguid             Environment
         credential_data    Variable length, contains the credential_id and credential_public_key. The length is
@@ -92,7 +92,7 @@ class AppleVerifier(Verifier):
 
     def verify_app_id(self, rp_id: bytes) -> bool:
         """
-        Compute the SHA256 hash of your app’s App ID, and verify that this is the same as the authenticator
+        Compute the SHA-256 hash of your app’s App ID, and verify that this is the same as the authenticator
         data’s RP ID hash.
         """
         if rp_id != sha256(self.attestation.config.app_id.encode()).digest():
@@ -102,7 +102,7 @@ class AppleVerifier(Verifier):
 
     def verify_key_id(self, cert: Certificate) -> bool:
         """
-        Create the SHA256 hash of the public key in credCert, and verify that it matches the key
+        Create the SHA-256 hash of the public key in credCert, and verify that it matches the key
         identifier from your app.
         """
         expected_key_id = cert.public_key.sha256
@@ -113,10 +113,10 @@ class AppleVerifier(Verifier):
 
     def verify_nonce(self, auth_data: bytes, nonce: bytes, cert: Certificate) -> bool:
         """
-        Create clientDataHash as the SHA256 hash of the one-time challenge sent to your app before performing the
+        Create clientDataHash as the SHA-256 hash of the one-time challenge sent to your app before performing the
         attest_apple, and append that hash to the end of the authenticator data (authData from the decoded object).
 
-        Generate a new SHA256 hash of the composite item to create nonce.
+        Generate a new SHA-256 hash of the composite item to create nonce.
 
         Obtain the value of the credCert extension with OID 1.2.840.113635.100.8.2, which is a DER-encoded ASN.1
         sequence. Decode the sequence and extract the single octet string that it contains. Verify that the string

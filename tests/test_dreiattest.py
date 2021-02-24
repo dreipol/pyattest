@@ -13,7 +13,7 @@ from pyattest.configs.google import GoogleConfig
 def test_apple():
     """ Special test specific for the attest_apple package. """
     server_nonce = '1fc6d08a2ffc842e25e4ca0deac203cd'  # sent beforehand
-    key_id = 'mbrDsK6QyPjKoTiliNSETympZqA643NiWIiK6B7vEOw='  # sha256 uf the public key which is in the request
+    key_id = 'mbrDsK6QyPjKoTiliNSETympZqA643NiWIiK6B7vEOw='  # SHA-256 uf the public key which is in the request
     uid = 'registration;A6215681-970F-4761-B352-0F0735F7E86F'  # in request header
 
     config = AppleConfig(key_id=base64.b64decode(key_id), app_id='5LVDC4HW22.ch.dreipol.dreiAttestTestHost')

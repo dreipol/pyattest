@@ -14,7 +14,7 @@ pyattest is available on PyPI and can be installed via `$ python -m pip install 
 
 The following parameters are important:
 
-- `key_id`: A base64 encoded sha256 hash of your apps certificate
+- `key_id`: A Base64 encoded SHA-256 hash of your apps certificate
 - `apk_package_name`: Name of your apk
 - `production`: Ignores basic integrity and cts profile check if `False`
 - `attest`: The jws object string representing the attestation
@@ -35,14 +35,14 @@ except PyAttestException as exception:
 
 The following parameters are important:
 
-- `key_id`: Sha256 hash of the public key form the cert you got back from the attestation
+- `key_id`: SHA-256 hash of the public key form the cert you got back from the attestation
 - `app_id`: Your app’s App ID, which is the concatenation of your 10-digit team identifier, a period, and your app’s CFBundleIdentifier value
 - `production`: Checks for the appropriate `aaguid`
 - `attest`: The apple attestation as binary
 - `nonce`: The nonce used to create the attestation
 
 ```python
-config = AppleConfig(key_id=key_id, app_id='1234ABCDEF.ch.dreipol.dreiDemo', production=True)
+config = AppleConfig(key_id=key_id, app_id='1234ABCDEF.ch.dreipol.demo', production=True)
 attestation = Attestation(attest, nonce, config)
 
 try:

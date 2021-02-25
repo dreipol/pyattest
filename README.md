@@ -1,5 +1,7 @@
 # pyattest
 
+[![Maintainability](https://api.codeclimate.com/v1/badges/bab7989f664ba4a47501/maintainability)](https://codeclimate.com/repos/603674bad5ad4c0176007ce0/maintainability)
+
 pyattest provides a common interface that helps you verify attestations from
 either [Google](https://developer.android.com/training/safetynet/attestation#request-attestation-process)
 or [Apple](https://developer.apple.com/documentation/devicecheck/validating_apps_that_connect_to_your_server).

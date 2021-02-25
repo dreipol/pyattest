@@ -33,7 +33,7 @@ class GoogleVerifier(Verifier):
             self.verify_basic_integrity(data.get('basicIntegrity', False))
             self.verify_cts_profile(data.get('ctsProfileMatch', False))
 
-        self.verify_key_id(data.get('apkCertificateDigestSha256', False))
+        self.verify_key_ids(data.get('apkCertificateDigestSha256', False))
 
         self.attestation.verified_data({'data': data, 'certs': certificate_chain})
 
@@ -53,7 +53,7 @@ class GoogleVerifier(Verifier):
 
         return certificate_chain, data
 
-    def verify_key_id(self, key_ids: Optional[list]):
+    def verify_key_ids(self, key_ids: Optional[list]):
         """
         The apkCertificateDigestSha256 can hold multiple certificates and we're comparing them against the list
         of key ids in our config.
@@ -61,8 +61,8 @@ class GoogleVerifier(Verifier):
         if not key_ids or len(key_ids) != len(self.attestation.config.key_ids):
             raise InvalidKeyIdException
 
-        for index, key in enumerate(key_ids):
-            if key.encode() != self.attestation.config.key_ids[index]:
+        for key, config_key in zip(key_ids, self.attestation.config.key_ids):
+            if key.encode() != config_key:
                 raise InvalidKeyIdException
 
     def verify_cts_profile(self, cts_profile: bool):
@@ -86,10 +86,7 @@ class GoogleVerifier(Verifier):
         Extract the SSL certificate chain from the JWS message. Before returning it, we need verify it otherwise
         it couldn't be used to check the jwt signature.
         """
-        chain = []
-        for cert in header.get('x5c', []):
-            chain.append(base64.b64decode(cert))
-
+        chain = list(map(base64.b64decode, header.get('x5c', [])))
         return self.verify_certificate_chain(chain)
 
     def verify_certificate_chain(self, chain: List[bytes]) -> ValidationPath:

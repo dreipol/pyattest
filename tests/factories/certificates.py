@@ -29,7 +29,6 @@ def generate():
             encryption_algorithm=serialization.BestAvailableEncryption(b'123'),
         ))
 
-    # add server_auth?
     subject = issuer = x509.Name([x509.NameAttribute(NameOID.ORGANIZATION_NAME, 'pyattest-testing-ca')])
     cert = x509.CertificateBuilder() \
         .subject_name(subject) \

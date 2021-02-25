@@ -6,6 +6,9 @@ import jwt
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.serialization.base import load_pem_private_key
+from cryptography.x509.base import load_pem_x509_certificate
+from cryptography.x509.oid import NameOID
 
 from tests.factories.certificates import key_usage
 

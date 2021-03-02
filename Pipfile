@@ -1,0 +1,21 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pytest-cov = "*"
+pytest = "*"
+
+[packages]
+cbor2 = "*"
+certvalidator = "*"
+pyjwt = "*"
+cryptography = "*"
+
+[scripts]
+tests = "pytest"
+coverage = "pytest --cov=pyattest tests/"
+
+[requires]
+python_version = "3.8"

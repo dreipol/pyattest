@@ -93,6 +93,7 @@ setup(
     url=URL,
     packages=find_packages(exclude=('tests',)),
     install_requires=REQUIRED,
+    package_data={'': ['certificates/Apple_App_Attestation_Root_CA.pem']},
     include_package_data=True,
     license='MIT',
     classifiers=[

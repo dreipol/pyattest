@@ -6,6 +6,7 @@ verify_ssl = true
 [dev-packages]
 pytest-cov = "*"
 pytest = "*"
+twine = "*"
 
 [packages]
 cbor2 = "*"
@@ -16,6 +17,7 @@ cryptography = "*"
 [scripts]
 tests = "pytest"
 coverage = "pytest --cov=pyattest tests/"
+upload = "python setup.py upload"
 
 [requires]
 python_version = "3.8"

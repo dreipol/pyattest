@@ -1,3 +1,4 @@
+import hashlib
 import struct
 from hashlib import sha256
 
@@ -5,6 +6,8 @@ from asn1crypto.x509 import Certificate, Extension
 from certvalidator import CertificateValidator, ValidationContext
 from certvalidator.errors import PathValidationError, PathBuildingError
 from certvalidator.path import ValidationPath
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey, ECDSA
 
 from pyattest.exceptions import ExtensionNotFoundException, InvalidNonceException, InvalidKeyIdException, \
     InvalidAppIdException, InvalidCounterException, InvalidAaguidException, InvalidCredentialIdException, \
@@ -154,7 +157,24 @@ class AppleVerifier(Verifier):
         except (PathBuildingError, PathValidationError) as exception:
             raise InvalidCertificateChainException from exception
 
-    def _get_extension(self, name: str, cert: Certificate) -> Extension:
+    @staticmethod
+    def verify_assertion(signature_header: bytes, client_data_hash: sha256, public_key: EllipticCurvePublicKey):
+        """
+         Verify the assertion object accompanied with the request.
+         Each verified assertion reestablishes the legitimacy of the client.
+         You typically require this for requests that access sensitive or premium content.
+        """
+        signature_content = cbor_decode(signature_header)
+        authenticator_data = signature_content["authenticatorData"]
+        nonce = sha256(authenticator_data + client_data_hash).digest()
+
+        public_key.verify(signature_content["signature"], nonce, ECDSA(hashes.SHA256()))
+
+    #     TODO: Verify App ID, check counter and verify embedded challenge
+
+
+    @staticmethod
+    def _get_extension(name: str, cert: Certificate) -> Extension:
         """ Helper method to get a specific x509 extension from a given certificate. """
         for extension in cert['tbs_certificate']['extensions']:
             if extension['extn_id'].native == name:

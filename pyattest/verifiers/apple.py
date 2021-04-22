@@ -1,8 +1,9 @@
-import hashlib
 import struct
 from hashlib import sha256
+from typing import Dict
 
 from asn1crypto.x509 import Certificate, Extension
+from cbor2 import loads as cbor_decode
 from certvalidator import CertificateValidator, ValidationContext
 from certvalidator.errors import PathValidationError, PathBuildingError
 from certvalidator.path import ValidationPath
@@ -13,7 +14,6 @@ from pyattest.exceptions import ExtensionNotFoundException, InvalidNonceExceptio
     InvalidAppIdException, InvalidCounterException, InvalidAaguidException, InvalidCredentialIdException, \
     InvalidCertificateChainException
 from pyattest.verifiers.verifier import Verifier
-from cbor2 import loads as cbor_decode
 
 
 class AppleVerifier(Verifier):
@@ -38,7 +38,7 @@ class AppleVerifier(Verifier):
         data = self.unpack(self.attestation.raw)
 
         chain = self.verify_certificate_chain(data['raw']['attStmt']['x5c'])
-        self.verify_nonce(data['raw']['authData'], self.attestation.nonce, chain[-1])
+        self.verify_nonce(data['authenticator_data'], self.attestation.nonce, chain[-1])
         self.verify_key_id(chain[-1])
         self.verify_app_id(data['rp_id'])
         self.verify_counter(data['counter'])
@@ -48,20 +48,34 @@ class AppleVerifier(Verifier):
         self.attestation.verified_data({'data': data, 'certs': chain})
 
     @staticmethod
-    def unpack(raw: bytes) -> dict:
+    def __unpack_credentials_data(authenticator_data: bytes) -> Dict[str, bytes]:
+        aaguid = None
+        credential_id = None
+
+        if credential_data := authenticator_data[37:]:
+            credential_id_length = struct.unpack('!H', credential_data[16:18])[0]
+            credential_id = credential_data[18:18 + credential_id_length]
+            aaguid = credential_data[:16]
+
+        return {
+            'aaguid': aaguid,
+            'credential_id': credential_id,
+        }
+
+    @classmethod
+    def unpack(cls, raw: bytes, auth_data_key: str = 'authData') -> dict:
         """ Extract in `verify` method mentioned relevant data from cbor encoded raw bytes input. """
         raw = cbor_decode(raw)
 
-        credential_data = raw['authData'][37:]
-        credential_id_length = struct.unpack('!H', credential_data[16:18])[0]
-
-        return {
+        authenticator_data = raw[auth_data_key]
+        unpacked = {
             'raw': raw,
-            'rp_id': raw['authData'][:32],
-            'counter': struct.unpack('!I', raw['authData'][33:37])[0],
-            'aaguid': credential_data[:16],
-            'credential_id': credential_data[18:18 + credential_id_length],
+            'authenticator_data': authenticator_data,
+            'rp_id': authenticator_data[:32],
+            'counter': struct.unpack('!I', authenticator_data[33:37])[0]
         }
+        unpacked.update(cls.__unpack_credentials_data(authenticator_data))
+        return unpacked
 
     @staticmethod
     def verify_credential_id(credential_id: bytes, cert: Certificate):
@@ -157,21 +171,21 @@ class AppleVerifier(Verifier):
         except (PathBuildingError, PathValidationError) as exception:
             raise InvalidCertificateChainException from exception
 
-    @staticmethod
-    def verify_assertion(signature_header: bytes, client_data_hash: sha256, public_key: EllipticCurvePublicKey):
+    @classmethod
+    def verify_assertion(cls, signature_header: bytes, client_data_hash: sha256, public_key: EllipticCurvePublicKey,
+                         config: 'configs.apple.AppleConfig'):
         """
          Verify the assertion object accompanied with the request.
          Each verified assertion reestablishes the legitimacy of the client.
          You typically require this for requests that access sensitive or premium content.
         """
-        signature_content = cbor_decode(signature_header)
-        authenticator_data = signature_content["authenticatorData"]
+        unpacked = cls.unpack(signature_header, "authenticatorData")
+        authenticator_data = unpacked["authenticator_data"]
         nonce = sha256(authenticator_data + client_data_hash).digest()
 
-        public_key.verify(signature_content["signature"], nonce, ECDSA(hashes.SHA256()))
+        public_key.verify(unpacked["raw"]["signature"], nonce, ECDSA(hashes.SHA256()))
 
     #     TODO: Verify App ID, check counter and verify embedded challenge
-
 
     @staticmethod
     def _get_extension(name: str, cert: Certificate) -> Extension:

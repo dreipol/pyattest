@@ -40,7 +40,7 @@ class AppleVerifier(Verifier):
         chain = self.verify_certificate_chain(data['raw']['attStmt']['x5c'])
         self.verify_nonce(data['authenticator_data'], self.attestation.nonce, chain[-1])
         self.verify_key_id(chain[-1])
-        self.verify_app_id(data['rp_id'])
+        self.verify_app_id(data['rp_id'], self.attestation.config)
         self.verify_counter(data['counter'])
         self.verify_aaguid(data['aaguid'])
         self.verify_credential_id(data['credential_id'], chain[-1])
@@ -104,12 +104,13 @@ class AppleVerifier(Verifier):
         if counter != 0:
             raise InvalidCounterException
 
-    def verify_app_id(self, rp_id: bytes):
+    @staticmethod
+    def verify_app_id(rp_id: bytes, config: 'configs.apple.AppleConfig'):
         """
         Compute the SHA-256 hash of your app’s App ID, and verify that this is the same as the authenticator
         data’s RP ID hash.
         """
-        if rp_id != sha256(self.attestation.config.app_id.encode()).digest():
+        if rp_id != sha256(config.app_id.encode()).digest():
             raise InvalidAppIdException
 
     def verify_key_id(self, cert: Certificate):
@@ -185,7 +186,10 @@ class AppleVerifier(Verifier):
 
         public_key.verify(unpacked["raw"]["signature"], nonce, ECDSA(hashes.SHA256()))
 
-    #     TODO: Verify App ID, check counter and verify embedded challenge
+        cls.verify_app_id(unpacked['rp_id'], config)
+
+    #     TODO: Check counter
+    #     TODO: Verify embedded challenge
 
     @staticmethod
     def _get_extension(name: str, cert: Certificate) -> Extension:

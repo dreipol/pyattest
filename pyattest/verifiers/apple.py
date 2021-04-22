@@ -189,7 +189,7 @@ class AppleVerifier(Verifier):
         cls.verify_app_id(unpacked['rp_id'], config)
 
     #     TODO: Check counter
-    #     TODO: Verify embedded challenge
+    #     TODO: Verify embedded challenge atm it should be tested that the snonce is 000...
 
     @staticmethod
     def _get_extension(name: str, cert: Certificate) -> Extension:

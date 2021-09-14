@@ -1,5 +1,6 @@
 import base64
 import datetime
+import os
 from pathlib import Path
 
 import jwt
@@ -16,8 +17,12 @@ from pyattest.testutils.factories.certificates import key_usage
 def get(apk_package_name: str, nonce: bytes, basic_integrity: bool = True, cts_profile: bool = True,
         apk_cert_digest: bytes = None):
     """ Helper to create a fake google attestation. """
-    root_key = load_pem_private_key(Path('pyattest/testutils/fixtures/root_key.pem').read_bytes(), b'123')
-    root_cert = load_pem_x509_certificate(Path('pyattest/testutils/fixtures/root_cert.pem').read_bytes())
+    here = os.path.abspath(os.path.dirname(__file__))
+    fixtures = os.path.join(here, '..', '..', 'fixtures')
+
+    root_key = load_pem_private_key(Path(f'{fixtures}/root_key.pem').read_bytes(), b'123')
+    root_cert = load_pem_x509_certificate(Path(f'{fixtures}/root_cert.pem').read_bytes())
+
     apk_cert_digest = apk_cert_digest or b'foobar'
 
     private_key = rsa.generate_private_key(

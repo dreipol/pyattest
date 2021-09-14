@@ -1,4 +1,5 @@
 import datetime
+import os
 import struct
 from hashlib import sha256
 from pathlib import Path
@@ -20,8 +21,11 @@ from pyattest.testutils.factories.certificates import key_usage
 def get(app_id: str, nonce: bytes, aaguid: bytes = b'appattestdevelop', counter: int = 0,
         wrong_public_key: bool = False):
     """ Helper to create a fake apple attestation. """
-    root_key = load_pem_private_key(Path('pyattest/testutils/fixtures/root_key.pem').read_bytes(), b'123')
-    root_cert = load_pem_x509_certificate(Path('pyattest/testutils/fixtures/root_cert.pem').read_bytes())
+    here = os.path.abspath(os.path.dirname(__file__))
+    fixtures = os.path.join(here, '..', '..', 'fixtures')
+
+    root_key = load_pem_private_key(Path(f'{fixtures}/root_key.pem').read_bytes(), b'123')
+    root_cert = load_pem_x509_certificate(Path(f'{fixtures}/root_cert.pem').read_bytes())
 
     private_key = rsa.generate_private_key(
         public_exponent=65537,

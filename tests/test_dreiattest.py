@@ -26,6 +26,7 @@ def test_apple():
     attestation.verify()
 
 
+@pytest.mark.skip(reason='only internal')
 def test_google():
     nonce = str.encode('f81d4fae-7dec-11d0-a765-00a0c91e6bf6')
     cert = """-----BEGIN CERTIFICATE-----

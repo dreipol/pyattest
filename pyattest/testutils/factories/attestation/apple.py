@@ -14,14 +14,14 @@ from cryptography.x509.base import load_pem_x509_certificate
 from cryptography.x509.extensions import UnrecognizedExtension
 from cryptography.x509.oid import NameOID
 
-from tests.factories.certificates import key_usage
+from pyattest.testutils.factories.certificates import key_usage
 
 
 def get(app_id: str, nonce: bytes, aaguid: bytes = b'appattestdevelop', counter: int = 0,
         wrong_public_key: bool = False):
     """ Helper to create a fake apple attestation. """
-    root_key = load_pem_private_key(Path('tests/fixtures/root_key.pem').read_bytes(), b'123')
-    root_cert = load_pem_x509_certificate(Path('tests/fixtures/root_cert.pem').read_bytes())
+    root_key = load_pem_private_key(Path('pyattest/testutils/fixtures/root_key.pem').read_bytes(), b'123')
+    root_cert = load_pem_x509_certificate(Path('pyattest/testutils/fixtures/root_cert.pem').read_bytes())
 
     private_key = rsa.generate_private_key(
         public_exponent=65537,

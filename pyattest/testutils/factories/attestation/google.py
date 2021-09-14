@@ -10,14 +10,14 @@ from cryptography.hazmat.primitives.serialization.base import load_pem_private_k
 from cryptography.x509.base import load_pem_x509_certificate
 from cryptography.x509.oid import NameOID
 
-from tests.factories.certificates import key_usage
+from pyattest.testutils.factories.certificates import key_usage
 
 
 def get(apk_package_name: str, nonce: bytes, basic_integrity: bool = True, cts_profile: bool = True,
         apk_cert_digest: bytes = None):
     """ Helper to create a fake google attestation. """
-    root_key = load_pem_private_key(Path('tests/fixtures/root_key.pem').read_bytes(), b'123')
-    root_cert = load_pem_x509_certificate(Path('tests/fixtures/root_cert.pem').read_bytes())
+    root_key = load_pem_private_key(Path('pyattest/testutils/fixtures/root_key.pem').read_bytes(), b'123')
+    root_cert = load_pem_x509_certificate(Path('pyattest/testutils/fixtures/root_cert.pem').read_bytes())
     apk_cert_digest = apk_cert_digest or b'foobar'
 
     private_key = rsa.generate_private_key(

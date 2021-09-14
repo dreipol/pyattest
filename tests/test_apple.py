@@ -6,21 +6,20 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.x509.base import load_pem_x509_certificate
 from pytest import raises
 
-import tests.factories.attestation.apple
 from pyattest.attestation import Attestation
 from pyattest.configs.apple import AppleConfig
 from pyattest.exceptions import InvalidAaguidException, InvalidNonceException, InvalidKeyIdException, \
     InvalidAppIdException, InvalidCounterException, InvalidCredentialIdException
-from tests.factories import attestation as attest_factory
+from pyattest.testutils.factories.attestation import apple as apple_factory
 
-root_ca = load_pem_x509_certificate(Path('tests/fixtures/root_cert.pem').read_bytes())
+root_ca = load_pem_x509_certificate(Path('pyattest/testutils/fixtures/root_cert.pem').read_bytes())
 root_ca_pem = root_ca.public_bytes(serialization.Encoding.PEM)
 nonce = os.urandom(32)
 
 
 def test_happy_path():
     """ Test the basic attest verification where everything works like it should :) """
-    attest, public_key = tests.factories.attestation.apple.get(app_id='foo', nonce=nonce)
+    attest, public_key = apple_factory.get(app_id='foo', nonce=nonce)
     key_id = sha256(public_key).digest()
     config = AppleConfig(key_id=key_id, app_id='foo', root_ca=root_ca_pem)
 
@@ -29,7 +28,7 @@ def test_happy_path():
 
 
 def test_aaguid():
-    attest, public_key = tests.factories.attestation.apple.get(app_id='foo', nonce=nonce)
+    attest, public_key = apple_factory.get(app_id='foo', nonce=nonce)
     key_id = sha256(public_key).digest()
     config = AppleConfig(key_id=key_id, app_id='foo', root_ca=root_ca_pem,
                          production=True)
@@ -40,7 +39,7 @@ def test_aaguid():
 
 
 def test_nonce():
-    attest, public_key = tests.factories.attestation.apple.get(app_id='foo', nonce=nonce)
+    attest, public_key = apple_factory.get(app_id='foo', nonce=nonce)
     key_id = sha256(public_key).digest()
     config = AppleConfig(key_id=key_id, app_id='foo', root_ca=root_ca_pem)
 
@@ -50,7 +49,7 @@ def test_nonce():
 
 
 def test_key_id():
-    attest, public_key = tests.factories.attestation.apple.get(app_id='foo', nonce=nonce)
+    attest, public_key = apple_factory.get(app_id='foo', nonce=nonce)
     key_id = sha256(b'invalid_public_key').digest()
     config = AppleConfig(key_id=key_id, app_id='foo', root_ca=root_ca_pem)
 
@@ -60,7 +59,7 @@ def test_key_id():
 
 
 def test_app_id():
-    attest, public_key = tests.factories.attestation.apple.get(app_id='foo', nonce=nonce)
+    attest, public_key = apple_factory.get(app_id='foo', nonce=nonce)
     key_id = sha256(public_key).digest()
     config = AppleConfig(key_id=key_id, app_id='bar', root_ca=root_ca_pem)
 
@@ -70,7 +69,7 @@ def test_app_id():
 
 
 def test_counter():
-    attest, public_key = tests.factories.attestation.apple.get(app_id='foo', nonce=nonce, aaguid=b'appattestdevelop', counter=9)
+    attest, public_key = apple_factory.get(app_id='foo', nonce=nonce, aaguid=b'appattestdevelop', counter=9)
     key_id = sha256(public_key).digest()
     config = AppleConfig(key_id=key_id, app_id='foo', root_ca=root_ca_pem)
 
@@ -80,7 +79,7 @@ def test_counter():
 
 
 def test_credential_id():
-    attest, public_key = tests.factories.attestation.apple.get(app_id='foo', nonce=nonce, wrong_public_key=True)
+    attest, public_key = apple_factory.get(app_id='foo', nonce=nonce, wrong_public_key=True)
     key_id = sha256(public_key).digest()
     config = AppleConfig(key_id=key_id, app_id='foo', root_ca=root_ca_pem)
 

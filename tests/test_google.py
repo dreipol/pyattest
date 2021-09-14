@@ -5,23 +5,24 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.x509.base import load_pem_x509_certificate
 from pytest import raises
 
-import tests.factories.attestation.google
+import pyattest.testutils.factories.attestation.google
 from pyattest.attestation import Attestation
 from pyattest.configs.google import GoogleConfig
 from pyattest.exceptions import InvalidKeyIdException, InvalidCtsProfile, InvalidBasicIntegrity, \
     InvalidCertificateChainException, InvalidAppIdException
-from tests.factories import attestation as attest_factory
 import os
 
+from pyattest.testutils.factories.attestation import google as google_factory
+
 root_cn = 'pyattest-testing-leaf.ch'
-root_ca = load_pem_x509_certificate(Path('tests/fixtures/root_cert.pem').read_bytes())
+root_ca = load_pem_x509_certificate(Path('pyattest/testutils/fixtures/root_cert.pem').read_bytes())
 root_ca_pem = root_ca.public_bytes(serialization.Encoding.PEM)
 nonce = os.urandom(32)
 
 
 def test_happy_path():
     """ Test the basic attest verification where everything works like it should :) """
-    attest, key_id = tests.factories.attestation.google.get(apk_package_name='foo', nonce=nonce)
+    attest, key_id = google_factory.get(apk_package_name='foo', nonce=nonce)
     config = GoogleConfig(key_ids=[base64.b64encode(key_id)], apk_package_name='foo', root_cn=root_cn,
                           root_ca=root_ca_pem, production=False)
 
@@ -30,7 +31,7 @@ def test_happy_path():
 
 
 def test_key_id():
-    attest, key_id = tests.factories.attestation.google.get(apk_package_name='foo', nonce=nonce)
+    attest, key_id = google_factory.get(apk_package_name='foo', nonce=nonce)
     config = GoogleConfig(key_ids=[base64.b64encode(b'100%wrong')], apk_package_name='foo', root_cn=root_cn,
                           root_ca=root_ca_pem, production=False)
 
@@ -41,7 +42,7 @@ def test_key_id():
 
 
 def test_cts_profile():
-    attest, key_id = tests.factories.attestation.google.get(apk_package_name='foo', nonce=nonce, cts_profile=False)
+    attest, key_id = google_factory.get(apk_package_name='foo', nonce=nonce, cts_profile=False)
     config = GoogleConfig(key_ids=[base64.b64encode(key_id)], apk_package_name='foo', root_cn=root_cn,
                           root_ca=root_ca_pem, production=True)
 
@@ -52,7 +53,7 @@ def test_cts_profile():
 
 
 def test_basic_integrity():
-    attest, key_id = tests.factories.attestation.google.get(apk_package_name='foo', nonce=nonce, basic_integrity=False)
+    attest, key_id = google_factory.get(apk_package_name='foo', nonce=nonce, basic_integrity=False)
     config = GoogleConfig(key_ids=[base64.b64encode(key_id)], apk_package_name='foo', root_cn=root_cn,
                           root_ca=root_ca_pem, production=True)
 
@@ -63,7 +64,7 @@ def test_basic_integrity():
 
 
 def test_apk_package_name():
-    attest, key_id = tests.factories.attestation.google.get(apk_package_name='foo', nonce=nonce)
+    attest, key_id = google_factory.get(apk_package_name='foo', nonce=nonce)
     config = GoogleConfig(key_ids=[base64.b64encode(key_id)], apk_package_name='bar', root_cn=root_cn,
                           root_ca=root_ca_pem, production=True)
 
@@ -74,7 +75,7 @@ def test_apk_package_name():
 
 
 def test_certificate_chain():
-    attest, key_id = tests.factories.attestation.google.get(apk_package_name='foo', nonce=nonce)
+    attest, key_id = google_factory.get(apk_package_name='foo', nonce=nonce)
     config = GoogleConfig(key_ids=[base64.b64encode(key_id)], apk_package_name='bar', root_cn=root_cn, production=True)
 
     attestation = Attestation(attest, nonce, config)

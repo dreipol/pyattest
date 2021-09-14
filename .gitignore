@@ -11,7 +11,7 @@ __pycache__
 tests/__pycache__
 
 build
-LinkIt.egg-info/
 dist/
 app.py
 app2.py
+pyattest.egg-info/

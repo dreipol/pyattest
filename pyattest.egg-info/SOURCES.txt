@@ -15,9 +15,8 @@ pyattest/configs/__init__.py
 pyattest/configs/apple.py
 pyattest/configs/config.py
 pyattest/configs/google.py
+pyattest/testutils/__init__.py
 pyattest/verifiers/__init__.py
 pyattest/verifiers/apple.py
 pyattest/verifiers/google.py
 pyattest/verifiers/verifier.py
-tests/factories/__init__.py
-tests/factories/certificates.py

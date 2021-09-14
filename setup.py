@@ -93,7 +93,7 @@ setup(
     url=URL,
     packages=find_packages(exclude=('tests',)),
     install_requires=REQUIRED,
-    package_data={'': ['certificates/Apple_App_Attestation_Root_CA.pem']},
+    package_data={'': ['certificates/Apple_App_Attestation_Root_CA.pem', 'testutils/fixtures/root_ert.pem', 'testutils/fixtures/root_key.pem']},
     include_package_data=True,
     license='MIT',
     classifiers=[

@@ -6,5 +6,10 @@ class Config(ABC):
 
     @property
     @abstractmethod
-    def verifier_class(self):
+    def attestation_verifier_class(self):
+        ...
+
+    @property
+    @abstractmethod
+    def assertion_verifier_class(self):
         ...

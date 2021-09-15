@@ -8,8 +8,8 @@ from pyattest.exceptions import PyAttestException
 
 
 class Assertion:
-    def __init__(self, signature: bytes, expected_hash: bytes, public_key: EllipticCurvePublicKey, config: Config):
-        self.signature = signature
+    def __init__(self, raw: bytes, expected_hash: bytes, public_key: EllipticCurvePublicKey, config: Config):
+        self.raw = raw
         self.expected_hash = expected_hash
         self.public_key = public_key
         self.config = config
@@ -18,7 +18,7 @@ class Assertion:
         self._verified_data = {}
 
     def verify(self):
-        self.config.verifier_class(self).verify_assertion()
+        self.config.assertion_verifier_class(self).verify()
 
     @property
     def data(self):

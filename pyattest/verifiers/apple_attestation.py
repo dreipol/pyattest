@@ -9,12 +9,12 @@ from certvalidator.path import ValidationPath
 from pyattest.exceptions import ExtensionNotFoundException, InvalidNonceException, InvalidKeyIdException, \
     InvalidAppIdException, InvalidCounterException, InvalidAaguidException, InvalidCredentialIdException, \
     InvalidCertificateChainException
-from pyattest.verifiers.verifier import Verifier
+from pyattest.verifiers.attestation import AttestationVerifier
 from cbor2 import loads as cbor_decode
 
 
-class AppleVerifier(Verifier):
-    def verify_attestation(self):
+class AppleAttestationVerifier(AttestationVerifier):
+    def verify(self):
         """
         Verify the given attestation based on the Apple documentation. The attestation is CBOR encoded and after
         decoding contains all relevant data according to the Webauthn specification.

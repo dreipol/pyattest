@@ -1,11 +1,13 @@
 from typing import Optional, List
 
 from pyattest.configs.config import Config
-from pyattest.verifiers.google import GoogleVerifier
+from pyattest.verifiers.google_assertion import GoogleAssertionVerifier
+from pyattest.verifiers.google_attestation import GoogleAttestationVerifier
 
 
 class GoogleConfig(Config):
-    verifier_class = GoogleVerifier
+    attestation_verifier_class = GoogleAttestationVerifier
+    assertion_verifier_class = GoogleAssertionVerifier
 
     def __init__(self, key_ids: List[bytes], apk_package_name: str, production: bool = False,
                  root_cn: str = 'attest.android.com', root_ca: bytes = None):

@@ -1,11 +1,13 @@
 from pathlib import Path
 
 from pyattest.configs.config import Config
-from pyattest.verifiers.apple import AppleVerifier
+from pyattest.verifiers.apple_assertion import AppleAssertionVerifier
+from pyattest.verifiers.apple_attestation import AppleAttestationVerifier
 
 
 class AppleConfig(Config):
-    verifier_class = AppleVerifier
+    attestation_verifier_class = AppleAttestationVerifier
+    assertion_verifier_class = AppleAssertionVerifier
 
     def __init__(self, key_id: bytes, app_id: str, production: bool = False, root_ca: bytes = None):
         self.key_id = key_id

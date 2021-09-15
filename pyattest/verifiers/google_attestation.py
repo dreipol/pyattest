@@ -10,11 +10,11 @@ from jwt import InvalidTokenError
 
 from pyattest.exceptions import PyAttestException, InvalidCertificateChainException, InvalidNonceException, \
     InvalidAppIdException, InvalidBasicIntegrity, InvalidCtsProfile, InvalidKeyIdException
-from pyattest.verifiers.verifier import Verifier
+from pyattest.verifiers.attestation import AttestationVerifier
 
 
-class GoogleVerifier(Verifier):
-    def verify_attestation(self):
+class GoogleAttestationVerifier(AttestationVerifier):
+    def verify(self):
         """
         Verify the given attestation based on the Google documentation. The attestation is formatted as JWS object.
 

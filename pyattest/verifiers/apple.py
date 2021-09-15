@@ -14,7 +14,7 @@ from cbor2 import loads as cbor_decode
 
 
 class AppleVerifier(Verifier):
-    def verify(self):
+    def verify_attestation(self):
         """
         Verify the given attestation based on the Apple documentation. The attestation is CBOR encoded and after
         decoding contains all relevant data according to the Webauthn specification.

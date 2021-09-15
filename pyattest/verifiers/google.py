@@ -14,7 +14,7 @@ from pyattest.verifiers.verifier import Verifier
 
 
 class GoogleVerifier(Verifier):
-    def verify(self):
+    def verify_attestation(self):
         """
         Verify the given attestation based on the Google documentation. The attestation is formatted as JWS object.
 

@@ -8,5 +8,9 @@ class Verifier(ABC):
         self.attestation = attestation
 
     @abstractmethod
-    def verify(self):
+    def verify_attestation(self):
+        ...
+
+    @abstractmethod
+    def verify_assertion(self):
         ...

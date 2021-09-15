@@ -5,7 +5,6 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.x509.base import load_pem_x509_certificate
 from pytest import raises
 
-import pyattest.testutils.factories.attestation.google
 from pyattest.attestation import Attestation
 from pyattest.configs.google import GoogleConfig
 from pyattest.exceptions import InvalidKeyIdException, InvalidCtsProfile, InvalidBasicIntegrity, \

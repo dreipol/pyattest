@@ -1,6 +1,3 @@
-from hashlib import sha256
-from typing import Union
-
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey
 
 from pyattest.configs.config import Config

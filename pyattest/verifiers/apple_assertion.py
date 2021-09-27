@@ -20,8 +20,6 @@ class AppleAssertionVerifier(AssertionVerifier):
 
         self.assertion.public_key.verify(unpacked['raw']['signature'], nonce, ECDSA(hashes.SHA256()))
 
-        # cls.verify_app_id(unpacked['rp_id'], config)
-
     @staticmethod
     def unpack(raw: bytes) -> dict:
         """ Extract in `verify` method mentioned relevant data from cbor encoded raw bytes input. """

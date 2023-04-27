@@ -22,8 +22,9 @@ class GooglePlayIntegrityAttestationVerifier(AttestationVerifier):
         """
         payload = self.unpack(self.attestation.raw)
         self.check_request_details(payload.get('requestDetails'))
-        self.check_app_integrity(payload.get('appIntegrity'))
-        self.check_device_integrity(payload.get('deviceIntegrity'))
+        if self.attestation.config.production:
+            self.check_app_integrity(payload.get('appIntegrity'))
+            self.check_device_integrity(payload.get('deviceIntegrity'))
 
     def unpack(self, jwt_object: str) -> dict:
         try:

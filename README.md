@@ -12,7 +12,11 @@ pyattest is available on PyPI and can be installed via `$ python -m pip install 
 
 In it's most basic form you can create either a `GoogleConfig` or `AppleConfig` instance, create an `Attestation` and verify it.
 
-### Google
+### Google Play Integrity API
+
+TBD
+
+### Google (Legacy: SafetyNet)
 
 The following parameters are important:
 

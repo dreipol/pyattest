@@ -6,12 +6,37 @@ from pathlib import Path
 import jwt
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.asymmetric import rsa, ec
 from cryptography.hazmat.primitives.serialization.base import load_pem_private_key
 from cryptography.x509.base import load_pem_x509_certificate
 from cryptography.x509.oid import NameOID
+from jose import jwe, jws
+from jose.constants import ALGORITHMS
 
 from pyattest.testutils.factories.certificates import key_usage
+
+
+def get_play_integrity_api_attestation(apk_package_name: str, nonce: bytes, app_integrity_verdict: str,
+                                       device_integrity_verdict: [str]):
+    """ Helper to create a fake google attestation. """
+    root_key = ec.generate_private_key(ec.SECP256K1())
+    aes_key = os.urandom(32)
+    payload = {
+        "requestDetails": {
+            "nonce": base64.urlsafe_b64encode(nonce).decode(),
+            "requestPackageName": apk_package_name,
+        },
+        "appIntegrity": {
+            "appRecognitionVerdict": app_integrity_verdict,
+            "packageName": apk_package_name,
+        },
+        "deviceIntegrity": {
+            "deviceRecognitionVerdict": device_integrity_verdict,
+        },
+    }
+    jws_token = jws.sign(payload, root_key, algorithm=ALGORITHMS.ES256)
+    return jwe.encrypt(jws_token, aes_key, algorithm=ALGORITHMS.A256KW, encryption=ALGORITHMS.A256GCM), \
+        root_key.public_key(), aes_key
 
 
 def get(apk_package_name: str, nonce: bytes, basic_integrity: bool = True, cts_profile: bool = True,

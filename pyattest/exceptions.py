@@ -10,6 +10,14 @@ class InvalidBasicIntegrity(PyAttestException):
     pass
 
 
+class InvalidAppIntegrity(PyAttestException):
+    pass
+
+
+class InvalidDeviceIntegrity(PyAttestException):
+    pass
+
+
 class InvalidCtsProfile(PyAttestException):
     pass
 

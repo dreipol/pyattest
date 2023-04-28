@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "593c48cd6020667ea5e8b1c20982aed3ab30c30c970a88e71deb5a11c6bfcf40"
+            "sha256": "3b299099d062a77bdced95eb4d582a65ecb2e45da2079723a92d7bb1d827383f"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -207,6 +207,9 @@
             "version": "==2.6.0"
         },
         "python-jose": {
+            "extras": [
+                "cryptography"
+            ],
             "hashes": [
                 "sha256:55779b5e6ad599c6336191246e95eb2293a9ddebd555f796a65f838f07e5d78a",
                 "sha256:9b1376b023f8b298536eedd47ae1089bcdb848f1535ab30555cd92002d78923a"
@@ -559,11 +562,11 @@
         },
         "rich": {
             "hashes": [
-                "sha256:22b74cae0278fd5086ff44144d3813be1cedc9115bdfabbfefd86400cb88b20a",
-                "sha256:b5d573e13605423ec80bdd0cd5f8541f7844a0e71a13f74cf454ccb2f490708b"
+                "sha256:2d11b9b8dd03868f09b4fffadc84a6a8cda574e40dc90821bd845720ebb8e89c",
+                "sha256:69cdf53799e63f38b95b9bf9c875f8c90e78dd62b2f00c13a911c7a3b9fa4704"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==13.3.4"
+            "version": "==13.3.5"
         },
         "six": {
             "hashes": [

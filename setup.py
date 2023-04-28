@@ -24,6 +24,7 @@ REQUIRED = [
     'cbor2',
     'certvalidator',
     'pyjwt',
+    'python-jose[cryptography]',
     'cryptography',
 ]
 

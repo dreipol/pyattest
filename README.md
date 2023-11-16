@@ -10,9 +10,35 @@ pyattest is available on PyPI and can be installed via `$ python -m pip install 
 
 ## Usage
 
-In it's most basic form you can create either a `GoogleConfig` or `AppleConfig` instance, create an `Attestation` and verify it.
+In it's most basic form you can create either a `GoogleConfig`, `GooglePlayIntegrityApiConfig` or `AppleConfig` instance, create an `Attestation` and verify it.
 
-### Google
+### Google Play Integrity API
+
+The following parameters are important:
+
+- `decryption_key`: A Base64 encoded AES key secret as described [here](https://developer.android.com/google/play/integrity/verdict#decrypt-verify)
+- `verification_key`: A Base64 encoded public key as described [here](https://developer.android.com/google/play/integrity/verdict#decrypt-verify)
+- `apk_package_name`: Name of your apk
+- `attest`: The jwt object string representing the attestation, which is a jws nested in a jwe object
+- `nonce`: The nonce used to create the attestation
+
+```python
+config = GooglePlayIntegrityApiConfig(
+            decryption_key=[decryption_key],
+            verification_key=[decryption_key],
+            apk_package_name='ch.dreipol.demo',
+            production=True
+        )
+attestation = Attestation(attest, nonce, config)
+
+try:
+    attestation.verify()
+except PyAttestException as exception:
+    # Do your thing
+    pass
+```
+
+### Google (Legacy: SafetyNet)
 
 The following parameters are important:
 

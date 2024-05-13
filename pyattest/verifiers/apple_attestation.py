@@ -76,7 +76,8 @@ class AppleAttestationVerifier(AttestationVerifier):
         if self.attestation.config.production and aaguid == b'appattest\x00\x00\x00\x00\x00\x00\x00':
             return
 
-        if not self.attestation.config.production and aaguid == b'appattestdevelop':
+        if not self.attestation.config.production and (aaguid == b'appattestdevelop'
+                                                       or aaguid == b'appattest\x00\x00\x00\x00\x00\x00\x00'):
             return
 
         raise InvalidAaguidException

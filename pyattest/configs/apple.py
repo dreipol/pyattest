@@ -9,7 +9,7 @@ class AppleConfig(Config):
     attestation_verifier_class = AppleAttestationVerifier
     assertion_verifier_class = AppleAssertionVerifier
 
-    def __init__(self, key_id: bytes, app_id: str, production: bool = False, root_ca: bytes = None):
+    def __init__(self, key_id: bytes, app_id: str, production: bool, root_ca: bytes = None):
         self.key_id = key_id
         self.app_id = app_id
         self.production = production

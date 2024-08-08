@@ -19,6 +19,9 @@ The following parameters are important:
 - `decryption_key`: A Base64 encoded AES key secret as described [here](https://developer.android.com/google/play/integrity/verdict#decrypt-verify)
 - `verification_key`: A Base64 encoded public key as described [here](https://developer.android.com/google/play/integrity/verdict#decrypt-verify)
 - `apk_package_name`: Name of your apk
+- `allow_non_play_distribution`: Set to true if you want to verify apps distributed via other means than Google Play (you need to set `verify_code_signature_hex`) *Note: should not be used for dev builds set `production` to `False` in that case instead.*
+- `verify_code_signature_hex`: The sha256 hash of the signing identity you use for distributing your app. This can be obtained using `./gradlew signingReport` in your Android project.
+- `required_device_verdict`: If you want to require stronger integrity guarantees pass [the corresponding key](https://developer.android.com/google/play/integrity/setup#optional_device_information) here.
 - `attest`: The jwt object string representing the attestation, which is a jws nested in a jwe object
 - `nonce`: The nonce used to create the attestation
 
@@ -27,7 +30,10 @@ config = GooglePlayIntegrityApiConfig(
             decryption_key=[decryption_key],
             verification_key=[decryption_key],
             apk_package_name='ch.dreipol.demo',
-            production=True
+            production=True,
+            allow_non_play_distribution=True,
+            verify_code_signature_hex=["00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00"],
+            required_device_verdict="MEETS_STRONG_INTEGRITY"
         )
 attestation = Attestation(attest, nonce, config)
 

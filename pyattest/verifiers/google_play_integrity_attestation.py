@@ -26,6 +26,8 @@ class GooglePlayIntegrityAttestationVerifier(AttestationVerifier):
             self.check_app_integrity(payload.get('appIntegrity'))
             self.check_device_integrity(payload.get('deviceIntegrity'))
 
+        self.attestation.verified_data({'data': payload})
+
     def unpack(self, jwt_object: str) -> dict:
         try:
             jwe_token = jwt_object

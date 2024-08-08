@@ -20,7 +20,7 @@ def test_happy_path():
     """ Test the basic attest verification where everything works like it should :) """
     attest, public_key = apple_factory.get(app_id='foo', nonce=nonce)
     key_id = sha256(public_key).digest()
-    config = AppleConfig(key_id=key_id, app_id='foo', root_ca=root_ca_pem)
+    config = AppleConfig(key_id=key_id, app_id='foo', root_ca=root_ca_pem, production=False)
 
     raw_assertion = b'asdf'
     expected_hash = b'asdf'

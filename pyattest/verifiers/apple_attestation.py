@@ -6,9 +6,16 @@ from certvalidator import CertificateValidator, ValidationContext
 from certvalidator.errors import PathValidationError, PathBuildingError
 from certvalidator.path import ValidationPath
 
-from pyattest.exceptions import ExtensionNotFoundException, InvalidNonceException, InvalidKeyIdException, \
-    InvalidAppIdException, InvalidCounterException, InvalidAaguidException, InvalidCredentialIdException, \
-    InvalidCertificateChainException
+from pyattest.exceptions import (
+    ExtensionNotFoundException,
+    InvalidNonceException,
+    InvalidKeyIdException,
+    InvalidAppIdException,
+    InvalidCounterException,
+    InvalidAaguidException,
+    InvalidCredentialIdException,
+    InvalidCertificateChainException,
+)
 from pyattest.verifiers.attestation import AttestationVerifier
 from cbor2 import loads as cbor_decode
 
@@ -34,35 +41,35 @@ class AppleAttestationVerifier(AttestationVerifier):
         """
         data = self.unpack(self.attestation.raw)
 
-        chain = self.verify_certificate_chain(data['raw']['attStmt']['x5c'])
-        self.verify_nonce(data['raw']['authData'], self.attestation.nonce, chain[-1])
+        chain = self.verify_certificate_chain(data["raw"]["attStmt"]["x5c"])
+        self.verify_nonce(data["raw"]["authData"], self.attestation.nonce, chain[-1])
         self.verify_key_id(chain[-1])
-        self.verify_app_id(data['rp_id'])
-        self.verify_counter(data['counter'])
-        self.verify_aaguid(data['aaguid'])
-        self.verify_credential_id(data['credential_id'], chain[-1])
+        self.verify_app_id(data["rp_id"])
+        self.verify_counter(data["counter"])
+        self.verify_aaguid(data["aaguid"])
+        self.verify_credential_id(data["credential_id"], chain[-1])
 
-        self.attestation.verified_data({'data': data, 'certs': chain})
+        self.attestation.verified_data({"data": data, "certs": chain})
 
     @staticmethod
     def unpack(raw: bytes) -> dict:
-        """ Extract in `verify` method mentioned relevant data from cbor encoded raw bytes input. """
+        """Extract in `verify` method mentioned relevant data from cbor encoded raw bytes input."""
         raw = cbor_decode(raw)
 
-        credential_data = raw['authData'][37:]
-        credential_id_length = struct.unpack('!H', credential_data[16:18])[0]
+        credential_data = raw["authData"][37:]
+        credential_id_length = struct.unpack("!H", credential_data[16:18])[0]
 
         return {
-            'raw': raw,
-            'rp_id': raw['authData'][:32],
-            'counter': struct.unpack('!I', raw['authData'][33:37])[0],
-            'aaguid': credential_data[:16],
-            'credential_id': credential_data[18:18 + credential_id_length],
+            "raw": raw,
+            "rp_id": raw["authData"][:32],
+            "counter": struct.unpack("!I", raw["authData"][33:37])[0],
+            "aaguid": credential_data[:16],
+            "credential_id": credential_data[18 : 18 + credential_id_length],
         }
 
     @staticmethod
     def verify_credential_id(credential_id: bytes, cert: Certificate):
-        """ Verify that the authenticator data’s credentialId field is the same as the key identifier. """
+        """Verify that the authenticator data’s credentialId field is the same as the key identifier."""
         if credential_id != cert.public_key.sha256:
             raise InvalidCredentialIdException
 
@@ -73,18 +80,23 @@ class AppleAttestationVerifier(AttestationVerifier):
 
         See also: https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_developer_devicecheck_appattest-environment
         """
-        if self.attestation.config.production and aaguid == b'appattest\x00\x00\x00\x00\x00\x00\x00':
+        if (
+            self.attestation.config.production
+            and aaguid == b"appattest\x00\x00\x00\x00\x00\x00\x00"
+        ):
             return
 
-        if not self.attestation.config.production and (aaguid == b'appattestdevelop'
-                                                       or aaguid == b'appattest\x00\x00\x00\x00\x00\x00\x00'):
+        if not self.attestation.config.production and (
+            aaguid == b"appattestdevelop"
+            or aaguid == b"appattest\x00\x00\x00\x00\x00\x00\x00"
+        ):
             return
 
         raise InvalidAaguidException
 
     @staticmethod
     def verify_counter(counter: int):
-        """ Verify that the authenticator data’s counter field equals 0. """
+        """Verify that the authenticator data’s counter field equals 0."""
         if counter != 0:
             raise InvalidCounterException
 
@@ -151,14 +163,14 @@ class AppleAttestationVerifier(AttestationVerifier):
         validator = CertificateValidator(cert, chain, validation_context=context)
 
         try:
-            return validator.validate_usage({'digital_signature'})
+            return validator.validate_usage({"digital_signature"})
         except (PathBuildingError, PathValidationError) as exception:
             raise InvalidCertificateChainException from exception
 
     def _get_extension(self, name: str, cert: Certificate) -> Extension:
-        """ Helper method to get a specific x509 extension from a given certificate. """
-        for extension in cert['tbs_certificate']['extensions']:
-            if extension['extn_id'].native == name:
+        """Helper method to get a specific x509 extension from a given certificate."""
+        for extension in cert["tbs_certificate"]["extensions"]:
+            if extension["extn_id"].native == name:
                 return extension
 
         raise ExtensionNotFoundException

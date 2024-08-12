@@ -16,7 +16,9 @@ class Attestation:
     @property
     def data(self):
         if not self.verified:
-            raise PyAttestException('Attestation needs to be verified before accessing it.')
+            raise PyAttestException(
+                "Attestation needs to be verified before accessing it."
+            )
 
         return self._verified_data
 
@@ -24,6 +26,6 @@ class Attestation:
         self.config.attestation_verifier_class(self).verify()
 
     def verified_data(self, data: dict):
-        """ The verifier from the config can set all relevant data once the verification is complete. """
+        """The verifier from the config can set all relevant data once the verification is complete."""
         self.verified = True
         self._verified_data = data

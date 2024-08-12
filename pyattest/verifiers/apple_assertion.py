@@ -15,19 +15,21 @@ class AppleAssertionVerifier(AssertionVerifier):
         of the client. You typically require this for requests that access sensitive or premium content.
         """
         unpacked = self.unpack(self.assertion.raw)
-        authenticator_data = unpacked['authenticator_data']
+        authenticator_data = unpacked["authenticator_data"]
         nonce = sha256(authenticator_data + self.assertion.expected_hash).digest()
 
-        self.assertion.public_key.verify(unpacked['raw']['signature'], nonce, ECDSA(hashes.SHA256()))
+        self.assertion.public_key.verify(
+            unpacked["raw"]["signature"], nonce, ECDSA(hashes.SHA256())
+        )
 
     @staticmethod
     def unpack(raw: bytes) -> dict:
-        """ Extract in `verify` method mentioned relevant data from cbor encoded raw bytes input. """
+        """Extract in `verify` method mentioned relevant data from cbor encoded raw bytes input."""
         raw = cbor_decode(raw)
 
         return {
-            'raw': raw,
-            'authenticator_data': raw['authenticatorData'],
-            'rp_id': raw['authenticatorData'][:32],
-            'counter': struct.unpack('!I', raw['authenticatorData'][33:37])[0],
+            "raw": raw,
+            "authenticator_data": raw["authenticatorData"],
+            "rp_id": raw["authenticatorData"][:32],
+            "counter": struct.unpack("!I", raw["authenticatorData"][33:37])[0],
         }

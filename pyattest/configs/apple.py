@@ -9,7 +9,9 @@ class AppleConfig(Config):
     attestation_verifier_class = AppleAttestationVerifier
     assertion_verifier_class = AppleAssertionVerifier
 
-    def __init__(self, key_id: bytes, app_id: str, production: bool, root_ca: bytes = None):
+    def __init__(
+        self, key_id: bytes, app_id: str, production: bool, root_ca: bytes = None
+    ):
         self.key_id = key_id
         self.app_id = app_id
         self.production = production
@@ -17,8 +19,8 @@ class AppleConfig(Config):
 
     @property
     def oid(self) -> str:
-        """ Object Identifier of the certificate extension containing our nonce. """
-        return '1.2.840.113635.100.8.2'
+        """Object Identifier of the certificate extension containing our nonce."""
+        return "1.2.840.113635.100.8.2"
 
     @property
     def root_ca(self) -> bytes:
@@ -30,5 +32,5 @@ class AppleConfig(Config):
         if self._custom_root_ca:
             return self._custom_root_ca
 
-        folder = Path(__file__).parent / '../certificates'
-        return Path(folder / 'Apple_App_Attestation_Root_CA.pem').read_bytes()
+        folder = Path(__file__).parent / "../certificates"
+        return Path(folder / "Apple_App_Attestation_Root_CA.pem").read_bytes()

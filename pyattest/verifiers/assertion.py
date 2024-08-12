@@ -8,5 +8,4 @@ class AssertionVerifier(ABC):
         self.assertion = assertion
 
     @abstractmethod
-    def verify(self):
-        ...
+    def verify(self): ...

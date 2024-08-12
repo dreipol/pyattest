@@ -5,7 +5,13 @@ from pyattest.exceptions import PyAttestException
 
 
 class Assertion:
-    def __init__(self, raw: bytes, expected_hash: bytes, public_key: EllipticCurvePublicKey, config: Config):
+    def __init__(
+        self,
+        raw: bytes,
+        expected_hash: bytes,
+        public_key: EllipticCurvePublicKey,
+        config: Config,
+    ):
         self.raw = raw
         self.expected_hash = expected_hash
         self.public_key = public_key
@@ -20,11 +26,13 @@ class Assertion:
     @property
     def data(self):
         if not self.verified:
-            raise PyAttestException('Assertion needs to be verified before accessing it.')
+            raise PyAttestException(
+                "Assertion needs to be verified before accessing it."
+            )
 
         return self._verified_data
 
     def verified_data(self, data: dict):
-        """ The verifier from the config can set all relevant data once the verification is complete. """
+        """The verifier from the config can set all relevant data once the verification is complete."""
         self.verified = True
         self._verified_data = data

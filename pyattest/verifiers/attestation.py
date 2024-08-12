@@ -8,5 +8,4 @@ class AttestationVerifier(ABC):
         self.attestation = attestation
 
     @abstractmethod
-    def verify(self):
-        ...
+    def verify(self): ...

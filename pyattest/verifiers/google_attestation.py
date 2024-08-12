@@ -8,8 +8,15 @@ from certvalidator.errors import PathValidationError, PathBuildingError
 from certvalidator.path import ValidationPath
 from jwt import InvalidTokenError
 
-from pyattest.exceptions import PyAttestException, InvalidCertificateChainException, InvalidNonceException, \
-    InvalidAppIdException, InvalidBasicIntegrity, InvalidCtsProfile, InvalidKeyIdException
+from pyattest.exceptions import (
+    PyAttestException,
+    InvalidCertificateChainException,
+    InvalidNonceException,
+    InvalidAppIdException,
+    InvalidBasicIntegrity,
+    InvalidCtsProfile,
+    InvalidKeyIdException,
+)
 from pyattest.verifiers.attestation import AttestationVerifier
 
 
@@ -25,17 +32,17 @@ class GoogleAttestationVerifier(AttestationVerifier):
         JWS RFC https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-36
         """
         certificate_chain, data = self.unpack(self.attestation.raw)
-        self.verify_nonce(data.get('nonce', None))
-        self.verify_apk_package_name(data.get('apkPackageName', None))
+        self.verify_nonce(data.get("nonce", None))
+        self.verify_apk_package_name(data.get("apkPackageName", None))
 
         # We'll only validate basic integrity and cts profile on production
         if self.attestation.config.production:
-            self.verify_basic_integrity(data.get('basicIntegrity', False))
-            self.verify_cts_profile(data.get('ctsProfileMatch', False))
+            self.verify_basic_integrity(data.get("basicIntegrity", False))
+            self.verify_cts_profile(data.get("ctsProfileMatch", False))
 
-        self.verify_key_ids(data.get('apkCertificateDigestSha256', False))
+        self.verify_key_ids(data.get("apkCertificateDigestSha256", False))
 
-        self.attestation.verified_data({'data': data, 'certs': certificate_chain})
+        self.attestation.verified_data({"data": data, "certs": certificate_chain})
 
     def unpack(self, jwt_object: str) -> Tuple[ValidationPath, dict]:
         """
@@ -44,10 +51,10 @@ class GoogleAttestationVerifier(AttestationVerifier):
         """
         header = jwt.get_unverified_header(jwt_object)
         certificate_chain = self._get_certificates(header)
-        public_key = pem.armor('PUBLIC KEY', certificate_chain[-1].public_key.dump())
+        public_key = pem.armor("PUBLIC KEY", certificate_chain[-1].public_key.dump())
 
         try:
-            data = jwt.decode(jwt_object, public_key, algorithms=['RS256'])
+            data = jwt.decode(jwt_object, public_key, algorithms=["RS256"])
         except InvalidTokenError as exception:
             raise PyAttestException from exception
 
@@ -86,7 +93,7 @@ class GoogleAttestationVerifier(AttestationVerifier):
         Extract the SSL certificate chain from the JWS message. Before returning it, we need verify it otherwise
         it couldn't be used to check the jwt signature.
         """
-        chain = list(map(base64.b64decode, header.get('x5c', [])))
+        chain = list(map(base64.b64decode, header.get("x5c", [])))
         return self.verify_certificate_chain(chain)
 
     def verify_certificate_chain(self, chain: List[bytes]) -> ValidationPath:
@@ -98,9 +105,13 @@ class GoogleAttestationVerifier(AttestationVerifier):
         """
         context = None
         if self.attestation.config.root_ca:
-            context = ValidationContext(extra_trust_roots=[self.attestation.config.root_ca])
+            context = ValidationContext(
+                extra_trust_roots=[self.attestation.config.root_ca]
+            )
 
-        validator = CertificateValidator(chain[0], chain[1:], validation_context=context)
+        validator = CertificateValidator(
+            chain[0], chain[1:], validation_context=context
+        )
 
         try:
             return validator.validate_tls(self.attestation.config.root_cn)

@@ -29,6 +29,9 @@ def get_play_integrity_api_attestation(apk_package_name: str, nonce: bytes, app_
         "appIntegrity": {
             "appRecognitionVerdict": app_integrity_verdict,
             "packageName": apk_package_name,
+            "certificateSha256Digest": [
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+            ],
         },
         "deviceIntegrity": {
             "deviceRecognitionVerdict": device_integrity_verdict,

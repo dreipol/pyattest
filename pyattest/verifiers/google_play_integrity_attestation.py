@@ -5,7 +5,7 @@ from typing import Optional
 from jose import jwe, jws
 
 from pyattest.exceptions import PyAttestException, InvalidNonceException, \
-    InvalidAppIdException, InvalidAppIntegrity, \
+    InvalidAppIdException, InvalidAppIntegrity, InvalidKeyIdException, \
     InvalidDeviceIntegrity
 from pyattest.verifiers.attestation import AttestationVerifier
 
@@ -26,6 +26,8 @@ class GooglePlayIntegrityAttestationVerifier(AttestationVerifier):
             self.check_app_integrity(payload.get('appIntegrity'))
             self.check_device_integrity(payload.get('deviceIntegrity'))
 
+        self.attestation.verified_data({'data': payload})
+
     def unpack(self, jwt_object: str) -> dict:
         try:
             jwe_token = jwt_object
@@ -36,12 +38,12 @@ class GooglePlayIntegrityAttestationVerifier(AttestationVerifier):
             raise PyAttestException from exception
 
     def check_app_integrity(self, app_integrity):
-        if app_integrity.get('appRecognitionVerdict') != 'PLAY_RECOGNIZED':
-            raise InvalidAppIntegrity
+        self.check_verdict(app_integrity.get('appRecognitionVerdict'))
+        self.verify_signing_keys(app_integrity.get('certificateSha256Digest'))
         self.verify_apk_package_name(app_integrity.get('packageName'))
 
     def check_device_integrity(self, device_integrity):
-        if 'MEETS_DEVICE_INTEGRITY' not in device_integrity.get('deviceRecognitionVerdict'):
+        if self.attestation.config.required_device_verdict not in device_integrity.get('deviceRecognitionVerdict'):
             raise InvalidDeviceIntegrity
 
     def check_request_details(self, request_details):
@@ -51,6 +53,21 @@ class GooglePlayIntegrityAttestationVerifier(AttestationVerifier):
     def verify_nonce(self, nonce: str):
         if base64.urlsafe_b64decode(nonce) != self.attestation.nonce:
             raise InvalidNonceException
+
+    def check_verdict(self, verdict):
+        if verdict == 'PLAY_RECOGNIZED':
+            pass
+        elif self.attestation.config.allow_non_play_distribution and verdict == 'UNRECOGNIZED_VERSION':
+            pass
+        else:
+            raise InvalidAppIntegrity
+
+    def verify_signing_keys(self, digest):
+        if not self.attestation.config.verify_code_signature:
+            return
+
+        if digest != self.attestation.config.verify_code_signature:
+            raise InvalidKeyIdException
 
     def verify_apk_package_name(self, package_name: Optional[str]):
         if not package_name or package_name != self.attestation.config.apk_package_name:

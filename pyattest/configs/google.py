@@ -9,7 +9,7 @@ class GoogleConfig(Config):
     attestation_verifier_class = GoogleAttestationVerifier
     assertion_verifier_class = GoogleAssertionVerifier
 
-    def __init__(self, key_ids: List[bytes], apk_package_name: str, production: bool = False,
+    def __init__(self, key_ids: List[bytes], apk_package_name: str, production: bool,
                  root_cn: str = 'attest.android.com', root_ca: bytes = None):
         self.key_ids = key_ids
         self.apk_package_name = apk_package_name

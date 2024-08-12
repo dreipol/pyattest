@@ -2,6 +2,10 @@ class PyAttestException(Exception):
     pass
 
 
+class IllegalConfigurationException(PyAttestException):
+    pass
+
+
 class InvalidJWT(PyAttestException):
     pass
 

@@ -33,8 +33,9 @@ class GooglePlayIntegrityApiConfig(Config):
 
         self.required_device_verdict = required_device_verdict
 
-    def __convert_signing_digest(self, hex: str):
+    @staticmethod
+    def __convert_signing_digest(hex: str):
         sanitized = hex.replace(':', '')
         digest_bytes = bytearray.fromhex(sanitized)
-        base64Signature = base64.urlsafe_b64encode(digest_bytes).decode()
-        return base64Signature.replace('=', '')
+        base64_signature = base64.urlsafe_b64encode(digest_bytes).decode()
+        return base64_signature.replace('=', '')

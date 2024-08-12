@@ -1,0 +1,17 @@
+# EXAMPLE USAGE:
+#
+#   Refer for explanation to following link:
+#   https://github.com/evilmartians/lefthook/blob/master/docs/configuration.md
+#
+
+prepare-commit-msg:
+  commands:
+    add-jira-id:
+      run: .lefthook/prepare-commit-msg {1}
+      runner: bash
+
+pre-commit:
+  commands:
+    lint:
+        glob: "*.{py}"
+        run: pipenv run black {staged_files} --check --exclude migrations

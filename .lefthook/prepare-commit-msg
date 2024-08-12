@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# based on https://gist.github.com/bartoszmajsak/1396344
+
+# This way you can customize which branches should be skipped when
+# prepending commit message.
+
+if [ -z "$BRANCHES_TO_SKIP" ]; then
+  BRANCHES_TO_SKIP=(master main stage develop test)
+fi
+
+
+REMOTE_PUSH_URL=$(git remote get-url origin --push)
+
+BRANCH_NAME=$(git symbolic-ref --short HEAD)
+BRANCH_NAME="${BRANCH_NAME##*/}"
+BRANCH_EXCLUDED=$(printf "%s\n" "${BRANCHES_TO_SKIP[@]}" | grep -c "^$BRANCH_NAME$")
+BRANCH_IN_COMMIT=$(grep -c "\[$BRANCH_NAME\]" $1)
+
+TICKET_NUMBER=$(echo "$BRANCH_NAME" | grep -Eo '^[A-Z0-9]{1,10}-[0-9]+')
+
+if [ -n "$BRANCH_NAME" ] && ! [[ $BRANCH_EXCLUDED -eq 1 ]] && ! [[ $BRANCH_IN_COMMIT -ge 1 ]]; then
+  if [ -n "$TICKET_NUMBER" ]; then
+    sed -i.bak -e "1s/^/[$TICKET_NUMBER] /" $1
+  else
+    sed -i.bak -e "1s/^/[$BRANCH_NAME] /" $1
+  fi
+fi

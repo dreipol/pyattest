@@ -1,7 +1,7 @@
 import base64
 import os
 
-from _pytest.python_api import raises
+from pytest import raises
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 from pyattest.attestation import Attestation

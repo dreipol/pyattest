@@ -12,8 +12,8 @@ twine = "*"
 cbor2 = "*"
 certvalidator = "*"
 pyjwt = "*"
-"python-jose[cryptography]" = "==3.3.*"
-cryptography = "*"
+"python-jose[cryptography]" = "==3.4.*"
+cryptography = "==44.0.*"
 black = "*"
 
 [scripts]

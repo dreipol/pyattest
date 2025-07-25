@@ -1,8 +1,11 @@
 from pathlib import Path
 
+from asn1crypto.x509 import Certificate
+
 from pyattest.configs.config import Config
 from pyattest.verifiers.apple_assertion import AppleAssertionVerifier
 from pyattest.verifiers.apple_attestation import AppleAttestationVerifier
+from pyattest.verifiers.utils import _load_certificate
 
 
 class AppleConfig(Config):
@@ -23,14 +26,16 @@ class AppleConfig(Config):
         return "1.2.840.113635.100.8.2"
 
     @property
-    def root_ca(self) -> bytes:
+    def root_ca(self) -> Certificate:
         """
         Apples App Attestation Root CA. This can be overwritten for easier testing.
 
         See also: https://www.apple.com/certificateauthority/private/
         """
         if self._custom_root_ca:
-            return self._custom_root_ca
+            bytes =  self._custom_root_ca
+        else:
+            folder = Path(__file__).parent / "../certificates"
+            bytes = Path(folder / "Apple_App_Attestation_Root_CA.pem").read_bytes()
 
-        folder = Path(__file__).parent / "../certificates"
-        return Path(folder / "Apple_App_Attestation_Root_CA.pem").read_bytes()
+        return _load_certificate(bytes)

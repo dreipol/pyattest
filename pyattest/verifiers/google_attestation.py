@@ -3,9 +3,10 @@ from typing import List, Optional, Tuple
 
 import jwt
 from asn1crypto import pem
-from certvalidator import CertificateValidator, ValidationContext
-from certvalidator.errors import PathValidationError, PathBuildingError
-from certvalidator.path import ValidationPath
+
+from pyhanko_certvalidator import ValidationContext, CertificateValidator
+from pyhanko_certvalidator.errors import PathValidationError, PathBuildingError
+from pyhanko_certvalidator.path import ValidationPath
 from jwt import InvalidTokenError
 
 from pyattest.exceptions import (

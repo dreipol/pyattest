@@ -10,7 +10,7 @@ twine = "*"
 
 [packages]
 cbor2 = "*"
-certvalidator = "*"
+pyhanko-certvalidator = "0.16.0"
 pyjwt = "*"
 "python-jose[cryptography]" = "==3.5.*"
 cryptography = "==45.0.*"

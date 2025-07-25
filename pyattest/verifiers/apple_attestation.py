@@ -2,9 +2,9 @@ import struct
 from hashlib import sha256
 
 from asn1crypto.x509 import Certificate, Extension
-from certvalidator import CertificateValidator, ValidationContext
-from certvalidator.errors import PathValidationError, PathBuildingError
-from certvalidator.path import ValidationPath
+from pyhanko_certvalidator import CertificateValidator, ValidationContext
+from pyhanko_certvalidator.errors import PathValidationError, PathBuildingError
+from pyhanko_certvalidator.path import ValidationPath
 
 from pyattest.exceptions import (
     ExtensionNotFoundException,

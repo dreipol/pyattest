@@ -12,8 +12,8 @@ twine = "*"
 cbor2 = "*"
 certvalidator = "*"
 pyjwt = "*"
-"python-jose[cryptography]" = "==3.4.*"
-cryptography = "==44.0.*"
+"python-jose[cryptography]" = "==3.5.*"
+cryptography = "==45.0.*"
 black = "*"
 
 [scripts]
@@ -22,4 +22,4 @@ coverage = "pytest --cov=pyattest tests/"
 upload = "python setup.py upload"
 
 [requires]
-python_version = "3.12"
+python_version = "3.13"

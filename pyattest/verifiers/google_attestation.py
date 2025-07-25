@@ -2,7 +2,7 @@ import base64
 from typing import List, Optional, Tuple
 
 import jwt
-from asn1crypto import pem
+from asn1crypto import pem, x509
 
 from pyhanko_certvalidator import ValidationContext, CertificateValidator
 from pyhanko_certvalidator.errors import PathValidationError, PathBuildingError
@@ -19,6 +19,7 @@ from pyattest.exceptions import (
     InvalidKeyIdException,
 )
 from pyattest.verifiers.attestation import AttestationVerifier
+from pyattest.verifiers.utils import _load_certificate
 
 
 class GoogleAttestationVerifier(AttestationVerifier):
@@ -110,8 +111,11 @@ class GoogleAttestationVerifier(AttestationVerifier):
                 extra_trust_roots=[self.attestation.config.root_ca]
             )
 
+        cert = _load_certificate(chain.pop(0))
+        intermediates = [_load_certificate(i) for i in chain]
+
         validator = CertificateValidator(
-            chain[0], chain[1:], validation_context=context
+            cert, intermediates, validation_context=context
         )
 
         try:

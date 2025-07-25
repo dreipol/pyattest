@@ -19,6 +19,8 @@ from pyattest.exceptions import (
 from pyattest.verifiers.attestation import AttestationVerifier
 from cbor2 import loads as cbor_decode
 
+from pyattest.verifiers.utils import _load_certificate
+
 
 class AppleAttestationVerifier(AttestationVerifier):
     def verify(self):
@@ -150,7 +152,7 @@ class AppleAttestationVerifier(AttestationVerifier):
         if calculated_nonce != expected_nonce:
             raise InvalidNonceException
 
-    def verify_certificate_chain(self, chain: list) -> ValidationPath:
+    def verify_certificate_chain(self, chain: list[bytes]) -> ValidationPath:
         """
         Verify that the x5c array contains the intermediate and leaf certificates for App Attest, starting from the
         credential certificate stored in the first data buffer in the array (credcert). Verify the validity of the
@@ -158,9 +160,10 @@ class AppleAttestationVerifier(AttestationVerifier):
 
         See also: https://www.apple.com/certificateauthority/private/
         """
-        cert = chain.pop(0)
+        cert =_load_certificate(chain.pop(0))
         context = ValidationContext(extra_trust_roots=[self.attestation.config.root_ca])
-        validator = CertificateValidator(cert, chain, validation_context=context)
+        chain_certs = [_load_certificate(i) for i in chain]
+        validator = CertificateValidator(cert, chain_certs, validation_context=context)
 
         try:
             return validator.validate_usage({"digital_signature"})

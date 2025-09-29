@@ -44,12 +44,12 @@ class AppleAttestationVerifier(AttestationVerifier):
         data = self.unpack(self.attestation.raw)
 
         chain = await self.verify_certificate_chain(data["raw"]["attStmt"]["x5c"])
-        self.verify_nonce(data["raw"]["authData"], self.attestation.nonce, chain[-1])
-        self.verify_key_id(chain[-1])
+        self.verify_nonce(data["raw"]["authData"], self.attestation.nonce, chain.last)
+        self.verify_key_id(chain.last)
         self.verify_app_id(data["rp_id"])
         self.verify_counter(data["counter"])
         self.verify_aaguid(data["aaguid"])
-        self.verify_credential_id(data["credential_id"], chain[-1])
+        self.verify_credential_id(data["credential_id"], chain.last)
 
         self.attestation.verified_data({"data": data, "certs": chain})
 

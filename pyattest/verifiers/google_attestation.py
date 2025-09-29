@@ -53,7 +53,7 @@ class GoogleAttestationVerifier(AttestationVerifier):
         """
         header = jwt.get_unverified_header(jwt_object)
         certificate_chain = await self._get_certificates(header)
-        public_key = pem.armor("PUBLIC KEY", certificate_chain[-1].public_key.dump())
+        public_key = pem.armor("PUBLIC KEY", certificate_chain.last.public_key.dump())
 
         try:
             data = jwt.decode(jwt_object, public_key, algorithms=["RS256"])

@@ -2,6 +2,7 @@ import os
 from hashlib import sha256
 from pathlib import Path
 
+import pytest
 from cryptography.hazmat.primitives import serialization
 from cryptography.x509.base import load_pem_x509_certificate
 from pytest import raises
@@ -25,7 +26,8 @@ root_ca_pem = root_ca.public_bytes(serialization.Encoding.PEM)
 nonce = os.urandom(32)
 
 
-def test_happy_path():
+@pytest.mark.asyncio
+async def test_happy_path():
     """Test the basic attest verification where everything works like it should :)"""
     attest, public_key = apple_factory.get(app_id="foo", nonce=nonce)
     key_id = sha256(public_key).digest()
@@ -34,10 +36,11 @@ def test_happy_path():
     )
 
     attestation = Attestation(attest, nonce, config)
-    attestation.verify()
+    await attestation.verify()
 
 
-def test_aaguid():
+@pytest.mark.asyncio
+async def test_aaguid():
     attest, public_key = apple_factory.get(app_id="foo", nonce=nonce)
     key_id = sha256(public_key).digest()
     config = AppleConfig(
@@ -46,10 +49,11 @@ def test_aaguid():
 
     attestation = Attestation(attest, nonce, config)
     with raises(InvalidAaguidException):
-        attestation.verify()
+        await attestation.verify()
 
 
-def test_nonce():
+@pytest.mark.asyncio
+async def test_nonce():
     attest, public_key = apple_factory.get(app_id="foo", nonce=nonce)
     key_id = sha256(public_key).digest()
     config = AppleConfig(
@@ -58,10 +62,11 @@ def test_nonce():
 
     attestation = Attestation(attest, os.urandom(32), config)
     with raises(InvalidNonceException):
-        attestation.verify()
+        await attestation.verify()
 
 
-def test_key_id():
+@pytest.mark.asyncio
+async def test_key_id():
     attest, public_key = apple_factory.get(app_id="foo", nonce=nonce)
     key_id = sha256(b"invalid_public_key").digest()
     config = AppleConfig(
@@ -70,10 +75,11 @@ def test_key_id():
 
     attestation = Attestation(attest, nonce, config)
     with raises(InvalidKeyIdException):
-        attestation.verify()
+        await attestation.verify()
 
 
-def test_app_id():
+@pytest.mark.asyncio
+async def test_app_id():
     attest, public_key = apple_factory.get(app_id="foo", nonce=nonce)
     key_id = sha256(public_key).digest()
     config = AppleConfig(
@@ -82,10 +88,11 @@ def test_app_id():
 
     attestation = Attestation(attest, nonce, config)
     with raises(InvalidAppIdException):
-        attestation.verify()
+        await attestation.verify()
 
 
-def test_counter():
+@pytest.mark.asyncio
+async def test_counter():
     attest, public_key = apple_factory.get(
         app_id="foo", nonce=nonce, aaguid=b"appattestdevelop", counter=9
     )
@@ -96,10 +103,11 @@ def test_counter():
 
     attestation = Attestation(attest, nonce, config)
     with raises(InvalidCounterException):
-        attestation.verify()
+        await attestation.verify()
 
 
-def test_credential_id():
+@pytest.mark.asyncio
+async def test_credential_id():
     attest, public_key = apple_factory.get(
         app_id="foo", nonce=nonce, wrong_public_key=True
     )
@@ -110,4 +118,4 @@ def test_credential_id():
 
     attestation = Attestation(attest, nonce, config)
     with raises(InvalidCredentialIdException):
-        attestation.verify()
+        await attestation.verify()

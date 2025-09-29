@@ -22,8 +22,8 @@ class Attestation:
 
         return self._verified_data
 
-    def verify(self):
-        self.config.attestation_verifier_class(self).verify()
+    async def verify(self):
+        await self.config.attestation_verifier_class(self).verify()
 
     def verified_data(self, data: dict):
         """The verifier from the config can set all relevant data once the verification is complete."""

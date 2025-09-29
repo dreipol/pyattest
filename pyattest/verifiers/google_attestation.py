@@ -23,7 +23,7 @@ from pyattest.verifiers.utils import _load_certificate
 
 
 class GoogleAttestationVerifier(AttestationVerifier):
-    def verify(self):
+    async def verify(self):
         """
         Verify the given attestation based on the Google documentation. The attestation is formatted as JWS object.
 
@@ -33,7 +33,7 @@ class GoogleAttestationVerifier(AttestationVerifier):
         Google Documentation https://developer.android.com/training/safetynet/attestation
         JWS RFC https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-36
         """
-        certificate_chain, data = self.unpack(self.attestation.raw)
+        certificate_chain, data = await self.unpack(self.attestation.raw)
         self.verify_nonce(data.get("nonce", None))
         self.verify_apk_package_name(data.get("apkPackageName", None))
 
@@ -46,13 +46,13 @@ class GoogleAttestationVerifier(AttestationVerifier):
 
         self.attestation.verified_data({"data": data, "certs": certificate_chain})
 
-    def unpack(self, jwt_object: str) -> Tuple[ValidationPath, dict]:
+    async def unpack(self, jwt_object: str) -> Tuple[ValidationPath, dict]:
         """
         We first need to get the unverified headers to get a hold of the certificate so we can use the certs
         public key to verify the jwt objects signature. The certificate chain needs to be validated first.
         """
         header = jwt.get_unverified_header(jwt_object)
-        certificate_chain = self._get_certificates(header)
+        certificate_chain = await self._get_certificates(header)
         public_key = pem.armor("PUBLIC KEY", certificate_chain[-1].public_key.dump())
 
         try:
@@ -90,15 +90,15 @@ class GoogleAttestationVerifier(AttestationVerifier):
         if base64.b64decode(nonce) != self.attestation.nonce:
             raise InvalidNonceException
 
-    def _get_certificates(self, header: dict) -> ValidationPath:
+    async def _get_certificates(self, header: dict) -> ValidationPath:
         """
         Extract the SSL certificate chain from the JWS message. Before returning it, we need verify it otherwise
         it couldn't be used to check the jwt signature.
         """
         chain = list(map(base64.b64decode, header.get("x5c", [])))
-        return self.verify_certificate_chain(chain)
+        return await self.verify_certificate_chain(chain)
 
-    def verify_certificate_chain(self, chain: List[bytes]) -> ValidationPath:
+    async def verify_certificate_chain(self, chain: List[bytes]) -> ValidationPath:
         """
         Validate the SSL certificate chain and use SSL hostname matching to verify that the leaf certificate was
         issued to the hostname attest.android.com.
@@ -119,6 +119,6 @@ class GoogleAttestationVerifier(AttestationVerifier):
         )
 
         try:
-            return validator.validate_tls(self.attestation.config.root_cn)
+            return await validator.async_validate_tls(self.attestation.config.root_cn)
         except (PathBuildingError, PathValidationError) as exception:
             raise InvalidCertificateChainException from exception

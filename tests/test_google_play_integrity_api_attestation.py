@@ -1,6 +1,7 @@
 import base64
 import os
 
+import pytest
 from pytest import raises
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
@@ -22,7 +23,8 @@ from pyattest.testutils.factories.attestation.google import (
 nonce = os.urandom(32)
 
 
-def test_happy_path():
+@pytest.mark.asyncio
+async def test_happy_path():
     apk_package_name = "foo"
     attestation, verification_key, aes_key = get_play_integrity_api_attestation(
         apk_package_name, nonce, "PLAY_RECOGNIZED", ["MEETS_DEVICE_INTEGRITY"]
@@ -39,10 +41,11 @@ def test_happy_path():
     )
 
     attestation = Attestation(attestation, nonce, config)
-    attestation.verify()
+    await attestation.verify()
 
 
-def test_happy_path_sideloaded():
+@pytest.mark.asyncio
+async def test_happy_path_sideloaded():
     apk_package_name = "foo"
     attestation, verification_key, aes_key = get_play_integrity_api_attestation(
         apk_package_name, nonce, "UNRECOGNIZED_VERSION", ["MEETS_DEVICE_INTEGRITY"]
@@ -63,10 +66,11 @@ def test_happy_path_sideloaded():
     )
 
     attestation = Attestation(attestation, nonce, config)
-    attestation.verify()
+    await attestation.verify()
 
 
-def test_invalid_signed_attest_token():
+@pytest.mark.asyncio
+async def test_invalid_signed_attest_token():
     apk_package_name = "foo"
     attestation, verification_key, aes_key = get_play_integrity_api_attestation(
         apk_package_name, nonce, "PLAY_RECOGNIZED", ["MEETS_DEVICE_INTEGRITY"]
@@ -85,10 +89,11 @@ def test_invalid_signed_attest_token():
 
     attestation = Attestation(attestation, nonce, config)
     with raises(PyAttestException):
-        attestation.verify()
+        await attestation.verify()
 
 
-def test_invalid_nonce():
+@pytest.mark.asyncio
+async def test_invalid_nonce():
     apk_package_name = "foo"
     invalid_nonce = os.urandom(32)
     attestation, verification_key, aes_key = get_play_integrity_api_attestation(
@@ -106,10 +111,11 @@ def test_invalid_nonce():
     )
     attestation = Attestation(attestation, nonce, config)
     with raises(InvalidNonceException):
-        attestation.verify()
+        await attestation.verify()
 
 
-def test_invalid_apk_package():
+@pytest.mark.asyncio
+async def test_invalid_apk_package():
     apk_package_name = "foo"
     wrong_apk_package_name = "foo_"
     attestation, verification_key, aes_key = get_play_integrity_api_attestation(
@@ -127,10 +133,11 @@ def test_invalid_apk_package():
     )
     attestation = Attestation(attestation, nonce, config)
     with raises(InvalidAppIdException):
-        attestation.verify()
+        await attestation.verify()
 
 
-def test_invalid_app_integrity():
+@pytest.mark.asyncio
+async def test_invalid_app_integrity():
     apk_package_name = "foo"
     attestation, verification_key, aes_key = get_play_integrity_api_attestation(
         apk_package_name, nonce, "PLAY_UNRECOGNIZED", ["MEETS_DEVICE_INTEGRITY"]
@@ -147,10 +154,11 @@ def test_invalid_app_integrity():
     )
     attestation = Attestation(attestation, nonce, config)
     with raises(InvalidAppIntegrity):
-        attestation.verify()
+        await attestation.verify()
 
 
-def test_invalid_key_sideloaded():
+@pytest.mark.asyncio
+async def test_invalid_key_sideloaded():
     apk_package_name = "foo"
     attestation, verification_key, aes_key = get_play_integrity_api_attestation(
         apk_package_name, nonce, "UNRECOGNIZED_VERSION", ["MEETS_DEVICE_INTEGRITY"]
@@ -172,10 +180,11 @@ def test_invalid_key_sideloaded():
 
     attestation = Attestation(attestation, nonce, config)
     with raises(InvalidKeyIdException):
-        attestation.verify()
+        await attestation.verify()
 
 
-def test_invalid_device_integrity():
+@pytest.mark.asyncio
+async def test_invalid_device_integrity():
     apk_package_name = "foo"
     attestation, verification_key, aes_key = get_play_integrity_api_attestation(
         apk_package_name, nonce, "PLAY_RECOGNIZED", []
@@ -192,10 +201,11 @@ def test_invalid_device_integrity():
     )
     attestation = Attestation(attestation, nonce, config)
     with raises(InvalidDeviceIntegrity):
-        attestation.verify()
+        await attestation.verify()
 
 
-def test_strong_device_integrity():
+@pytest.mark.asyncio
+async def test_strong_device_integrity():
     apk_package_name = "foo"
     attestation, verification_key, aes_key = get_play_integrity_api_attestation(
         apk_package_name,
@@ -215,10 +225,11 @@ def test_strong_device_integrity():
         required_device_verdict="MEETS_STRONG_INTEGRITY",
     )
     attestation = Attestation(attestation, nonce, config)
-    attestation.verify()
+    await attestation.verify()
 
 
-def test_missing_strong_device_integrity():
+@pytest.mark.asyncio
+async def test_missing_strong_device_integrity():
     apk_package_name = "foo"
     attestation, verification_key, aes_key = get_play_integrity_api_attestation(
         apk_package_name,
@@ -239,9 +250,10 @@ def test_missing_strong_device_integrity():
     )
     attestation = Attestation(attestation, nonce, config)
     with raises(InvalidDeviceIntegrity):
-        attestation.verify()
+        await attestation.verify()
 
 
+@pytest.mark.asyncio
 def test_illegal_config1():
     apk_package_name = "foo"
     _, verification_key, aes_key = get_play_integrity_api_attestation(
@@ -262,6 +274,7 @@ def test_illegal_config1():
         )
 
 
+@pytest.mark.asyncio
 def test_illegal_config2():
     apk_package_name = "foo"
     _, verification_key, aes_key = get_play_integrity_api_attestation(

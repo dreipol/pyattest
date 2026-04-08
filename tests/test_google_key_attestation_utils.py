@@ -93,6 +93,8 @@ def test_fetch_roots_delegates_to_parse():
         "pyattest/certificates/google_hardware_attestation_root_rsa_2022.pem"
     ).read_text()
     fake_response = MagicMock()
+    fake_response.__enter__ = lambda s: s
+    fake_response.__exit__ = MagicMock(return_value=False)
     fake_response.read.return_value = json.dumps([bundled_pem]).encode()
 
     with patch(
@@ -121,6 +123,8 @@ def test_fetch_revocation_delegates_to_parse():
     import json
 
     fake_response = MagicMock()
+    fake_response.__enter__ = lambda s: s
+    fake_response.__exit__ = MagicMock(return_value=False)
     fake_response.read.return_value = json.dumps(
         {"entries": {"abc": {"status": "REVOKED"}}}
     ).encode()

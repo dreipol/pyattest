@@ -72,11 +72,13 @@ def fetch_google_key_attestation_roots(
     a custom HTTP client or async fetching.
     """
     try:
-        resp = urllib.request.urlopen(url, timeout=10)
-        data = resp.read(_MAX_FETCH_BYTES + 1)
-        if len(data) > _MAX_FETCH_BYTES:
-            raise RuntimeError(f"Response from {url} exceeds {_MAX_FETCH_BYTES} bytes")
-        pem_list = json.loads(data)
+        with urllib.request.urlopen(url, timeout=10) as resp:
+            data = resp.read(_MAX_FETCH_BYTES + 1)
+            if len(data) > _MAX_FETCH_BYTES:
+                raise RuntimeError(
+                    f"Response from {url} exceeds {_MAX_FETCH_BYTES} bytes"
+                )
+            pem_list = json.loads(data)
     except RuntimeError:
         raise
     except Exception as e:
@@ -132,11 +134,13 @@ def fetch_google_revocation_list(
     See: https://developer.android.com/privacy-and-security/security-key-attestation#certificate_status
     """
     try:
-        resp = urllib.request.urlopen(url, timeout=10)
-        raw = resp.read(_MAX_FETCH_BYTES + 1)
-        if len(raw) > _MAX_FETCH_BYTES:
-            raise RuntimeError(f"Response from {url} exceeds {_MAX_FETCH_BYTES} bytes")
-        data = json.loads(raw)
+        with urllib.request.urlopen(url, timeout=10) as resp:
+            raw = resp.read(_MAX_FETCH_BYTES + 1)
+            if len(raw) > _MAX_FETCH_BYTES:
+                raise RuntimeError(
+                    f"Response from {url} exceeds {_MAX_FETCH_BYTES} bytes"
+                )
+            data = json.loads(raw)
     except RuntimeError:
         raise
     except Exception as e:

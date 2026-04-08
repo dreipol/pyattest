@@ -3,7 +3,6 @@ import hmac
 import json
 from typing import List, Optional
 
-from asn1crypto.x509 import Certificate
 from cryptography import x509 as cx509
 from pyhanko_certvalidator import CertificateValidator, ValidationContext
 from pyhanko_certvalidator.errors import PathBuildingError, PathValidationError

@@ -16,7 +16,6 @@ Changes from the original:
   - Extracted _explicit_tag() helper to reduce repetition
   - Removed attestation_version parameter from parse_authorization_list()
   - Simplified error handling to raise instead of log-and-continue
-  - Added debug logging at key parsing points
   - Added attestationIdSecondImei (tag 723) to AuthorizationList
   - parse_attestation_application_id() returns all packages, not just the first
   - Trailing DER bytes after KeyDescription are rejected (not just warned)
@@ -25,13 +24,9 @@ The ASN.1 schema follows Google's official KeyDescription specification:
   https://developer.android.com/privacy-and-security/security-key-attestation#key_attestation_ext_schema
 """
 
-import logging
-
 from pyasn1.codec.der import decoder as der_decoder
 from pyasn1.error import PyAsn1Error
 from pyasn1.type import constraint, namedtype, namedval, tag, univ
-
-logger = logging.getLogger(__name__)
 
 OID_KEY_ATTESTATION = "1.3.6.1.4.1.11129.2.1.17"
 
@@ -387,13 +382,11 @@ class AttestationApplicationIdSchema(univ.Sequence):
 
 def parse_attestation_application_id(app_id_bytes: bytes) -> dict:
     """Parse the DER-encoded AttestationApplicationId from tag 709."""
-    logger.debug("Parsing AttestationApplicationId: %d bytes", len(app_id_bytes))
     try:
         app_id_obj, _ = der_decoder.decode(
             app_id_bytes, asn1Spec=AttestationApplicationIdSchema()
         )
     except PyAsn1Error as e:
-        logger.debug("Failed to decode AttestationApplicationId: %s", e)
         raise ValueError("Malformed AttestationApplicationId sequence.") from e
 
     parsed = {}
@@ -411,9 +404,6 @@ def parse_attestation_application_id(app_id_bytes: bytes) -> dict:
                     pkg["version"] = int(pkg_version)
                 if pkg:
                     packages.append(pkg)
-    else:
-        logger.debug("AttestationApplicationId has no package infos")
-
     # Backwards-compatible: keep package_name/version from first entry
     if packages:
         parsed["package_name"] = packages[0].get("package_name")
@@ -428,12 +418,10 @@ def parse_attestation_application_id(app_id_bytes: bytes) -> dict:
                 signatures.append(bytes(item).hex())
     parsed["signature_digests"] = signatures
 
-    logger.debug("Parsed AttestationApplicationId: %s", parsed)
     return parsed
 
 
 def _parse_root_of_trust(rot_obj: RootOfTrustAsn1) -> dict:
-    logger.debug("Parsing RootOfTrust")
     parsed = {}
     try:
         parsed["verified_boot_key"] = bytes(
@@ -446,15 +434,13 @@ def _parse_root_of_trust(rot_obj: RootOfTrustAsn1) -> dict:
         parsed["verified_boot_hash"] = bytes(
             rot_obj.getComponentByName("verifiedBootHash")
         ).hex()
-    except (TypeError, ValueError, PyAsn1Error, AttributeError) as e:
-        logger.error("Error parsing RootOfTrust: %s", e)
+    except (TypeError, ValueError, PyAsn1Error, AttributeError):
         return {}
     return parsed
 
 
 def parse_authorization_list(auth_list_obj: AuthorizationList) -> dict:
     """Parse an AuthorizationList ASN.1 object into a dict."""
-    logger.debug("Parsing AuthorizationList")
     parsed = {}
 
     # Integer fields
@@ -513,8 +499,8 @@ def parse_authorization_list(auth_list_obj: AuthorizationList) -> dict:
             parsed["attestation_application_id"] = parse_attestation_application_id(
                 bytes(app_id_comp)
             )
-        except ValueError as e:
-            logger.warning("Failed to parse AttestationApplicationId: %s", e)
+        except ValueError:
+            pass  # Malformed tag 709 - app id will be missing from result
 
     # RootOfTrust
     rot_comp = auth_list_obj.getComponentByName("rootOfTrust")
@@ -559,11 +545,6 @@ def parse_key_description(key_desc_bytes: bytes) -> dict:
         keymint_security_level, attestation_challenge, unique_id,
         software_enforced, hardware_enforced
     """
-    logger.debug(
-        "Parsing KeyDescription: %d bytes (first 64: %s)",
-        len(key_desc_bytes),
-        key_desc_bytes[:64].hex(),
-    )
     try:
         key_desc_obj, rest = der_decoder.decode(
             key_desc_bytes, asn1Spec=KeyDescriptionSequence()
@@ -573,7 +554,6 @@ def parse_key_description(key_desc_bytes: bytes) -> dict:
                 f"Trailing data after KeyDescription: {len(rest)} extra bytes"
             )
     except PyAsn1Error as e:
-        logger.debug("Failed to decode KeyDescription: %s", e)
         raise ValueError(
             "Malformed KeyDescription sequence (schema validation failed)."
         ) from e
@@ -617,12 +597,4 @@ def parse_key_description(key_desc_bytes: bytes) -> dict:
     else:
         parsed["hardware_enforced"] = {}
 
-    logger.debug(
-        "KeyDescription parsed: version=%s, security_level=%s, challenge=%d bytes",
-        parsed.get("attestation_version"),
-        SECURITY_LEVEL_NAMES.get(
-            parsed.get("attestation_security_level", -1), "unknown"
-        ),
-        len(parsed.get("attestation_challenge", b"")),
-    )
     return parsed

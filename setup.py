@@ -99,6 +99,7 @@ setup(
             "certificates/Apple_App_Attestation_Root_CA.pem",
             "testutils/fixtures/root_cert.pem",
             "testutils/fixtures/root_key.pem",
+            "testutils/fixtures/google_key_*.pem",
         ]
     },
     include_package_data=True,

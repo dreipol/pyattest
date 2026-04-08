@@ -97,6 +97,7 @@ setup(
     package_data={
         "": [
             "certificates/Apple_App_Attestation_Root_CA.pem",
+            "certificates/google_hardware_attestation_root_*.pem",
             "testutils/fixtures/root_cert.pem",
             "testutils/fixtures/root_key.pem",
             "testutils/fixtures/google_key_*.pem",

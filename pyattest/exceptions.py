@@ -56,3 +56,11 @@ class InvalidCredentialIdException(PyAttestException):
 
 class InvalidCertificateChainException(PyAttestException):
     pass
+
+
+class InvalidSecurityLevelException(PyAttestException):
+    pass
+
+
+class RevokedCertificateException(PyAttestException):
+    pass

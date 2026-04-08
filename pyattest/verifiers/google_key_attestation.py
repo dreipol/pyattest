@@ -83,7 +83,12 @@ class GoogleKeyAttestationVerifier(AttestationVerifier):
         Returns (validated_chain, key_description_dict).
         """
         if isinstance(raw, bytes):
-            raw = raw.decode("utf-8")
+            try:
+                raw = raw.decode("utf-8")
+            except UnicodeDecodeError as e:
+                raise InvalidCertificateChainException(
+                    "Attestation data is not valid UTF-8."
+                ) from e
 
         if len(raw) > 1_000_000:
             raise InvalidCertificateChainException(

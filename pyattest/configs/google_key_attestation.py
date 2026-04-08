@@ -11,7 +11,7 @@ devices chain to older root generations - all 5 are needed for full compatibilit
 """
 
 from pathlib import Path
-from typing import List, Optional, Set, Union
+from typing import List, Optional, Set
 
 from asn1crypto.x509 import Certificate
 
@@ -72,10 +72,10 @@ class GoogleKeyAttestationConfig(Config):
         Use ``fetch_google_key_attestation_roots()`` from ``pyattest.verifiers.utils``
         to get an up-to-date list merged with the bundled roots.
         """
-        if self._custom_root_cas:
+        if self._custom_root_cas is not None:
             return self._custom_root_cas
 
-        if self._custom_root_ca:
+        if self._custom_root_ca is not None:
             return [self._custom_root_ca]
 
         if self._bundled_root_cas is None:

@@ -32,10 +32,6 @@ from pyattest.key_description import (
     SecurityLevel,
     SECURITY_LEVEL_TRUSTED_ENVIRONMENT,
     SECURITY_LEVEL_STRONG_BOX,
-    TAG_ATTESTATION_APPLICATION_ID,
-    TAG_NO_AUTH_REQUIRED,
-    TAG_ORIGIN,
-    TAG_PURPOSE,
 )
 from pyattest.testutils.factories.certificates import key_usage
 

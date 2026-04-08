@@ -26,7 +26,7 @@ The ASN.1 schema follows Google's official KeyDescription specification:
 
 from pyasn1.codec.der import decoder as der_decoder
 from pyasn1.error import PyAsn1Error
-from pyasn1.type import constraint, namedtype, namedval, tag, univ
+from pyasn1.type import namedtype, namedval, tag, univ
 
 OID_KEY_ATTESTATION = "1.3.6.1.4.1.11129.2.1.17"
 

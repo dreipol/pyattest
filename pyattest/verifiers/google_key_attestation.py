@@ -139,8 +139,13 @@ class GoogleKeyAttestationVerifier(AttestationVerifier):
         root_cas = self.attestation.config.root_cas
         context = ValidationContext(trust_roots=root_cas)
 
-        cert = _load_certificate(der_certs[0])
-        intermediates = [_load_certificate(c) for c in der_certs[1:]]
+        try:
+            cert = _load_certificate(der_certs[0])
+            intermediates = [_load_certificate(c) for c in der_certs[1:]]
+        except Exception as e:
+            raise InvalidCertificateChainException(
+                "Failed to parse certificate in chain."
+            ) from e
 
         validator = CertificateValidator(
             cert, intermediates, validation_context=context
@@ -161,7 +166,12 @@ class GoogleKeyAttestationVerifier(AttestationVerifier):
         if not revoked:
             return
         for cert_der in der_certs:
-            cert = cx509.load_der_x509_certificate(cert_der)
+            try:
+                cert = cx509.load_der_x509_certificate(cert_der)
+            except Exception as e:
+                raise InvalidCertificateChainException(
+                    "Failed to parse certificate for revocation check."
+                ) from e
             serial_hex = format(cert.serial_number, "x")
             if serial_hex in revoked:
                 raise RevokedCertificateException(
@@ -240,7 +250,9 @@ class GoogleKeyAttestationVerifier(AttestationVerifier):
         expected_digests = self.attestation.config.apk_signature_digests
         if expected_digests is not None:
             actual_digests = app_id.get("signature_digests", [])
-            if not actual_digests or set(expected_digests) != set(actual_digests):
+            if not actual_digests or {d.lower() for d in expected_digests} != {
+                d.lower() for d in actual_digests
+            }:
                 raise InvalidAppIdException
 
     def _parse_attestation_extension(self, cert: cx509.Certificate) -> dict:

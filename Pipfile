@@ -11,6 +11,7 @@ setuptools = "*"
 
 [packages]
 cbor2 = "*"
+pyasn1 = "*"
 pyhanko-certvalidator = "0.19.8"
 pyjwt = "*"
 "python-jose[cryptography]" = "==3.5.*"

@@ -22,7 +22,8 @@ VERSION = None
 
 REQUIRED = [
     "cbor2",
-    "pyhanko_certvalidator",
+    "pyasn1",
+    "pyhanko_certvalidator>=0.19.8,<0.20",
     "pyjwt",
     "python-jose[cryptography]",
     "cryptography",

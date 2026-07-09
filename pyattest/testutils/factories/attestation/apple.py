@@ -4,7 +4,7 @@ import struct
 from hashlib import sha256
 from pathlib import Path
 
-from _cbor2 import dumps as cbor_encode
+from cbor2 import dumps as cbor_encode
 from asn1crypto.core import OctetString
 from cryptography import x509
 from cryptography.hazmat._oid import ObjectIdentifier

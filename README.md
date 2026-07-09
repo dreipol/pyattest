@@ -1,8 +1,6 @@
 # pyattest
 
-[![Maintainability](https://api.codeclimate.com/v1/badges/bab7989f664ba4a47501/maintainability)](https://codeclimate.com/repos/603674bad5ad4c0176007ce0/maintainability)
-
-pyattest provides a common interface that helps you verify attestations from either [Google](https://developer.android.com/google/play/integrity) or [Apple](https://developer.apple.com/documentation/devicecheck/validating_apps_that_connect_to_your_server). The package works standalone but if you use django and need a full implementation with key generation and storage then [django-dreiattest](https://github.com/dreipol/django-dreiattest) could be of interest for you.
+pyattest is a server-side library that is designed to help you verify that you are talking to genuine instances of your app (i.e. that your client code is running as you intended it to). It provides a common interface that helps you verify attestations from either [Google](https://developer.android.com/google/play/integrity) or [Apple](https://developer.apple.com/documentation/devicecheck/validating_apps_that_connect_to_your_server). The package works standalone but if you use django and need a full implementation with key generation and storage then [django-dreiattest](https://github.com/dreipol/django-dreiattest) could be of interest for you.
 
 ## Installation
 

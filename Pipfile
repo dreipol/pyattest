@@ -8,6 +8,7 @@ pytest-cov = "*"
 pytest = "*"
 twine = "*"
 setuptools = "*"
+pytest-asyncio = "*"
 
 [packages]
 cbor2 = "*"

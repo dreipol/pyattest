@@ -23,7 +23,7 @@ from pyattest.verifiers.utils import _load_certificate
 
 
 class AppleAttestationVerifier(AttestationVerifier):
-    def verify(self):
+    async def verify(self):
         """
         Verify the given attestation based on the Apple documentation. The attestation is CBOR encoded and after
         decoding contains all relevant data according to the Webauthn specification.
@@ -43,13 +43,13 @@ class AppleAttestationVerifier(AttestationVerifier):
         """
         data = self.unpack(self.attestation.raw)
 
-        chain = self.verify_certificate_chain(data["raw"]["attStmt"]["x5c"])
-        self.verify_nonce(data["raw"]["authData"], self.attestation.nonce, chain[-1])
-        self.verify_key_id(chain[-1])
+        chain = await self.verify_certificate_chain(data["raw"]["attStmt"]["x5c"])
+        self.verify_nonce(data["raw"]["authData"], self.attestation.nonce, chain.last)
+        self.verify_key_id(chain.last)
         self.verify_app_id(data["rp_id"])
         self.verify_counter(data["counter"])
         self.verify_aaguid(data["aaguid"])
-        self.verify_credential_id(data["credential_id"], chain[-1])
+        self.verify_credential_id(data["credential_id"], chain.last)
 
         self.attestation.verified_data({"data": data, "certs": chain})
 
@@ -152,7 +152,7 @@ class AppleAttestationVerifier(AttestationVerifier):
         if calculated_nonce != expected_nonce:
             raise InvalidNonceException
 
-    def verify_certificate_chain(self, chain: list[bytes]) -> ValidationPath:
+    async def verify_certificate_chain(self, chain: list[bytes]) -> ValidationPath:
         """
         Verify that the x5c array contains the intermediate and leaf certificates for App Attest, starting from the
         credential certificate stored in the first data buffer in the array (credcert). Verify the validity of the
@@ -160,13 +160,13 @@ class AppleAttestationVerifier(AttestationVerifier):
 
         See also: https://www.apple.com/certificateauthority/private/
         """
-        cert =_load_certificate(chain.pop(0))
+        cert = _load_certificate(chain.pop(0))
         context = ValidationContext(extra_trust_roots=[self.attestation.config.root_ca])
         chain_certs = [_load_certificate(i) for i in chain]
         validator = CertificateValidator(cert, chain_certs, validation_context=context)
 
         try:
-            return validator.validate_usage({"digital_signature"})
+            return await validator.async_validate_usage({"digital_signature"})
         except (PathBuildingError, PathValidationError) as exception:
             raise InvalidCertificateChainException from exception
 

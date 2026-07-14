@@ -16,7 +16,7 @@ from pyattest.verifiers.attestation import AttestationVerifier
 
 
 class GooglePlayIntegrityAttestationVerifier(AttestationVerifier):
-    def verify(self):
+    async def verify(self):
         """
         Verify the given attestation based on the Google documentation. The attestation is a nested JWS in JWE object.
 

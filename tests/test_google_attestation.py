@@ -1,6 +1,7 @@
 import base64
 from pathlib import Path
 
+import pytest
 from cryptography.hazmat.primitives import serialization
 from cryptography.x509.base import load_pem_x509_certificate
 from pytest import raises
@@ -26,7 +27,8 @@ root_ca_pem = root_ca.public_bytes(serialization.Encoding.PEM)
 nonce = os.urandom(32)
 
 
-def test_happy_path():
+@pytest.mark.asyncio
+async def test_happy_path():
     """Test the basic attest verification where everything works like it should :)"""
     attest, key_id = google_factory.get(apk_package_name="foo", nonce=nonce)
     config = GoogleConfig(
@@ -38,10 +40,11 @@ def test_happy_path():
     )
 
     attestation = Attestation(attest, nonce, config)
-    attestation.verify()
+    await attestation.verify()
 
 
-def test_key_id():
+@pytest.mark.asyncio
+async def test_key_id():
     attest, key_id = google_factory.get(apk_package_name="foo", nonce=nonce)
     config = GoogleConfig(
         key_ids=[base64.b64encode(b"100%wrong")],
@@ -54,10 +57,11 @@ def test_key_id():
     attestation = Attestation(attest, nonce, config)
 
     with raises(InvalidKeyIdException):
-        attestation.verify()
+        await attestation.verify()
 
 
-def test_cts_profile():
+@pytest.mark.asyncio
+async def test_cts_profile():
     attest, key_id = google_factory.get(
         apk_package_name="foo", nonce=nonce, cts_profile=False
     )
@@ -72,10 +76,11 @@ def test_cts_profile():
     attestation = Attestation(attest, nonce, config)
 
     with raises(InvalidCtsProfile):
-        attestation.verify()
+        await attestation.verify()
 
 
-def test_basic_integrity():
+@pytest.mark.asyncio
+async def test_basic_integrity():
     attest, key_id = google_factory.get(
         apk_package_name="foo", nonce=nonce, basic_integrity=False
     )
@@ -90,10 +95,11 @@ def test_basic_integrity():
     attestation = Attestation(attest, nonce, config)
 
     with raises(InvalidBasicIntegrity):
-        attestation.verify()
+        await attestation.verify()
 
 
-def test_apk_package_name():
+@pytest.mark.asyncio
+async def test_apk_package_name():
     attest, key_id = google_factory.get(apk_package_name="foo", nonce=nonce)
     config = GoogleConfig(
         key_ids=[base64.b64encode(key_id)],
@@ -106,10 +112,11 @@ def test_apk_package_name():
     attestation = Attestation(attest, nonce, config)
 
     with raises(InvalidAppIdException):
-        attestation.verify()
+        await attestation.verify()
 
 
-def test_certificate_chain():
+@pytest.mark.asyncio
+async def test_certificate_chain():
     attest, key_id = google_factory.get(apk_package_name="foo", nonce=nonce)
     config = GoogleConfig(
         key_ids=[base64.b64encode(key_id)],
@@ -121,4 +128,4 @@ def test_certificate_chain():
     attestation = Attestation(attest, nonce, config)
 
     with raises(InvalidCertificateChainException):
-        attestation.verify()
+        await attestation.verify()

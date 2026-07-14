@@ -33,7 +33,7 @@ class AppleConfig(Config):
         See also: https://www.apple.com/certificateauthority/private/
         """
         if self._custom_root_ca:
-            bytes =  self._custom_root_ca
+            bytes = self._custom_root_ca
         else:
             folder = Path(__file__).parent / "../certificates"
             bytes = Path(folder / "Apple_App_Attestation_Root_CA.pem").read_bytes()

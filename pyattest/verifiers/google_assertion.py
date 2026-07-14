@@ -9,3 +9,5 @@ class GoogleAssertionVerifier(AssertionVerifier):
         self.assertion.public_key.verify(
             self.assertion.raw, self.assertion.expected_hash, ECDSA(hashes.SHA256())
         )
+
+        self.assertion.verified_data(dict())

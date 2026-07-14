@@ -49,5 +49,5 @@ def generate():
         .sign(root_private_key, hashes.SHA256())
     )
 
-    with open("pyatest/testutils/fixtures/root_cert.pem", "wb") as f:
+    with open("pyattest/testutils/fixtures/root_cert.pem", "wb") as f:
         f.write(cert.public_bytes(serialization.Encoding.PEM))

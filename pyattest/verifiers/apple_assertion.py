@@ -4,7 +4,11 @@ from hashlib import sha256
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric.ec import ECDSA
 
-from pyattest.exceptions import InvalidFormatException
+from pyattest.exceptions import (
+    InvalidAppIdException,
+    InvalidCounterException,
+    InvalidFormatException,
+)
 from pyattest.verifiers.assertion import AssertionVerifier
 from cbor2 import CBORDecodeError, loads as cbor_decode
 
@@ -22,8 +26,27 @@ class AppleAssertionVerifier(AssertionVerifier):
         self.assertion.public_key.verify(
             unpacked["raw"]["signature"], nonce, ECDSA(hashes.SHA256())
         )
+        self.verify_app_id(unpacked["rp_id"])
+        self.verify_counter(unpacked["counter"])
 
         self.assertion.verified_data(unpacked)
+
+    def verify_app_id(self, rp_id: bytes):
+        """
+        Compute the SHA-256 hash of the client’s App ID, and verify that it matches the RP ID in the authenticator
+        data.
+        """
+        if rp_id != sha256(self.assertion.config.app_id.encode()).digest():
+            raise InvalidAppIdException
+
+    def verify_counter(self, counter: int):
+        """
+        Verify that the authenticator data’s counter value is greater than the value from the previous assertion,
+        or greater than 0 on the first assertion. Only checked when the caller passes `previous_counter`.
+        """
+        previous = self.assertion.previous_counter
+        if previous is not None and counter <= previous:
+            raise InvalidCounterException
 
     @staticmethod
     def unpack(raw: bytes) -> dict:

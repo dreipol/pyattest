@@ -4,8 +4,9 @@ from hashlib import sha256
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric.ec import ECDSA
 
+from pyattest.exceptions import InvalidFormatException
 from pyattest.verifiers.assertion import AssertionVerifier
-from cbor2 import loads as cbor_decode
+from cbor2 import CBORDecodeError, loads as cbor_decode
 
 
 class AppleAssertionVerifier(AssertionVerifier):
@@ -26,8 +27,28 @@ class AppleAssertionVerifier(AssertionVerifier):
 
     @staticmethod
     def unpack(raw: bytes) -> dict:
-        """Extract in `verify` method mentioned relevant data from cbor encoded raw bytes input."""
-        raw = cbor_decode(raw)
+        """
+        Extract in `verify` method mentioned relevant data from cbor encoded raw bytes input.
+
+        Raises InvalidFormatException if the input is not an App Attest assertion object.
+        """
+        try:
+            raw = cbor_decode(raw)
+        except (CBORDecodeError, TypeError, ValueError) as exception:
+            raise InvalidFormatException("Assertion is not valid CBOR") from exception
+
+        if (
+            not isinstance(raw, dict)
+            or not isinstance(raw.get("signature"), bytes)
+            or not isinstance(raw.get("authenticatorData"), bytes)
+        ):
+            raise InvalidFormatException(
+                "Assertion has no signature or authenticatorData"
+            )
+
+        # rp_id (32), flags (1), counter (4)
+        if len(raw["authenticatorData"]) < 37:
+            raise InvalidFormatException("authenticatorData is too short")
 
         return {
             "raw": raw,

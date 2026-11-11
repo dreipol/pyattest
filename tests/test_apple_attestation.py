@@ -3,6 +3,7 @@ from hashlib import sha256
 from pathlib import Path
 
 import pytest
+from cbor2 import dumps as cbor_encode, loads as cbor_decode
 from cryptography.hazmat.primitives import serialization
 from cryptography.x509.base import load_pem_x509_certificate
 from pytest import raises
@@ -16,6 +17,7 @@ from pyattest.exceptions import (
     InvalidAppIdException,
     InvalidCounterException,
     InvalidCredentialIdException,
+    InvalidFormatException,
 )
 from pyattest.testutils.factories.attestation import apple as apple_factory
 
@@ -118,4 +120,50 @@ async def test_credential_id():
 
     attestation = Attestation(attest, nonce, config)
     with raises(InvalidCredentialIdException):
+        await attestation.verify()
+
+
+def _malformed(change):
+    """A valid attestation, decoded, changed by `change` and encoded again."""
+    attest, _ = apple_factory.get(app_id="foo", nonce=nonce)
+    data = cbor_decode(attest)
+    change(data)
+    return cbor_encode(data)
+
+
+MALFORMED_ATTESTATIONS = {
+    "empty": lambda: b"",
+    "not cbor": lambda: b"\xff\x00",
+    "not a map": lambda: cbor_encode([1, 2, 3]),
+    "empty map": lambda: cbor_encode({}),
+    "wrong fmt": lambda: _malformed(lambda data: data.update(fmt="packed")),
+    "no attStmt": lambda: _malformed(lambda data: data.pop("attStmt")),
+    "no authData": lambda: _malformed(lambda data: data.pop("authData")),
+    "authData not bytes": lambda: _malformed(
+        lambda data: data.update(authData="not bytes")
+    ),
+    "no x5c": lambda: _malformed(lambda data: data["attStmt"].pop("x5c")),
+    "empty x5c": lambda: _malformed(lambda data: data["attStmt"].update(x5c=[])),
+    "x5c not bytes": lambda: _malformed(
+        lambda data: data["attStmt"].update(x5c=["not bytes"])
+    ),
+    "short authData": lambda: _malformed(
+        lambda data: data.update(authData=data["authData"][:54])
+    ),
+    "truncated credential id": lambda: _malformed(
+        lambda data: data.update(authData=data["authData"][:60])
+    ),
+}
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("case", MALFORMED_ATTESTATIONS)
+async def test_malformed_attestation(case):
+    raw = MALFORMED_ATTESTATIONS[case]()
+    config = AppleConfig(
+        key_id=b"key", app_id="foo", root_ca=root_ca_pem, production=False
+    )
+
+    attestation = Attestation(raw, nonce, config)
+    with raises(InvalidFormatException):
         await attestation.verify()

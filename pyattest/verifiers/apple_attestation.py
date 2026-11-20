@@ -161,7 +161,7 @@ class AppleAttestationVerifier(AttestationVerifier):
         See also: https://www.apple.com/certificateauthority/private/
         """
         cert = _load_certificate(chain.pop(0))
-        context = ValidationContext(extra_trust_roots=[self.attestation.config.root_ca])
+        context = ValidationContext(trust_roots=[self.attestation.config.root_ca])
         chain_certs = [_load_certificate(i) for i in chain]
         validator = CertificateValidator(cert, chain_certs, validation_context=context)
 

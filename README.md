@@ -86,15 +86,16 @@ except PyAttestException as exception:
 
 ### Assertion
 
-Once you verified and obtained a public key, you can use it to `assert` further requests. For a full implementation on how to get to the public key check out [django-dreiattest](https://github.com/dreipol/django-dreiattest/blob/master/dreiattest/key.py). To check if an `assertion` is valid we check if it was signed with given `pem_key`.
+Once you verified and obtained a public key, you can use it to `assert` further requests. For a full implementation on how to get to the public key check out [django-dreiattest](https://github.com/dreipol/django-dreiattest/blob/master/dreiattest/key.py). To check if an `assertion` is valid we check if it was signed with given `pem_key`. For Apple, we also check that it was made by the app in the config's `app_id`, and, if you pass `previous_counter`, that its counter is higher than the one you stored.
 
 - `assertion`: Raw bytes of the assertion you want to test
 - `expected_hash`: The hash we want to compare the signature against
 - `pem_key`: The public key to verify the signature
 - `config`: A `AppleConfig` or `GoogleConfig` instance 
+- `previous_counter` (optional, Apple): The counter of the last assertion you accepted for this key, `0` right after the attestation. Store `assertion.data["counter"]` after each verified assertion.
 
 ```
-assertion = Assertion(assertion, expected_hash, pem_key, config)
+assertion = Assertion(assertion, expected_hash, pem_key, config, previous_counter=0)
 assertion.verify()
 ```
 

@@ -15,9 +15,10 @@ from pyattest.exceptions import (
     InvalidAaguidException,
     InvalidCredentialIdException,
     InvalidCertificateChainException,
+    InvalidFormatException,
 )
 from pyattest.verifiers.attestation import AttestationVerifier
-from cbor2 import loads as cbor_decode
+from cbor2 import CBORDecodeError, loads as cbor_decode
 
 from pyattest.verifiers.utils import _load_certificate
 
@@ -55,11 +56,40 @@ class AppleAttestationVerifier(AttestationVerifier):
 
     @staticmethod
     def unpack(raw: bytes) -> dict:
-        """Extract in `verify` method mentioned relevant data from cbor encoded raw bytes input."""
-        raw = cbor_decode(raw)
+        """
+        Extract in `verify` method mentioned relevant data from cbor encoded raw bytes input.
 
-        credential_data = raw["authData"][37:]
+        Raises InvalidFormatException if the input is not an App Attest attestation object.
+        """
+        try:
+            raw = cbor_decode(raw)
+        except (CBORDecodeError, TypeError, ValueError) as exception:
+            raise InvalidFormatException("Attestation is not valid CBOR") from exception
+
+        if not isinstance(raw, dict) or raw.get("fmt") != "apple-appattest":
+            raise InvalidFormatException("Attestation is not an apple-appattest object")
+
+        statement = raw.get("attStmt")
+        auth_data = raw.get("authData")
+        if not isinstance(statement, dict) or not isinstance(auth_data, bytes):
+            raise InvalidFormatException("Attestation has no attStmt or authData")
+
+        chain = statement.get("x5c")
+        if (
+            not isinstance(chain, list)
+            or not chain
+            or not all(isinstance(cert, bytes) for cert in chain)
+        ):
+            raise InvalidFormatException("attStmt.x5c is not a list of certificates")
+
+        # rp_id (32), flags (1), counter (4), aaguid (16), credential id length (2)
+        if len(auth_data) < 55:
+            raise InvalidFormatException("authData is too short")
+
+        credential_data = auth_data[37:]
         credential_id_length = struct.unpack("!H", credential_data[16:18])[0]
+        if len(credential_data) < 18 + credential_id_length:
+            raise InvalidFormatException("authData is shorter than its credential id")
 
         return {
             "raw": raw,

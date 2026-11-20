@@ -1,3 +1,5 @@
+from typing import Optional
+
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey
 
 from pyattest.configs.config import Config
@@ -11,11 +13,18 @@ class Assertion:
         expected_hash: bytes,
         public_key: EllipticCurvePublicKey,
         config: Config,
+        previous_counter: Optional[int] = None,
     ):
+        """
+        `previous_counter` is the counter of the last assertion accepted for this key (0 right after the
+        attestation). When it is given, an Apple assertion must carry a higher counter, which rejects a replayed
+        assertion. Store the new counter, `data["counter"]`, once the assertion is verified.
+        """
         self.raw = raw
         self.expected_hash = expected_hash
         self.public_key = public_key
         self.config = config
+        self.previous_counter = previous_counter
 
         self.verified = False
         self._verified_data = {}

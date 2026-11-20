@@ -56,3 +56,7 @@ class InvalidCredentialIdException(PyAttestException):
 
 class InvalidCertificateChainException(PyAttestException):
     pass
+
+
+class InvalidFormatException(PyAttestException):
+    pass
